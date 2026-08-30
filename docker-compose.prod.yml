@@ -37,7 +37,7 @@ services:
       PORT: 3000
       # Read at runtime, so pointing the frontend at another backend is a
       # restart rather than a rebuild.
-      API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8080}
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:8080}
     expose:
       - "3000"
     networks:
