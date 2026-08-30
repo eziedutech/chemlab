@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { AgentActivityIndicator } from "../AgentActivityIndicator";
+import { ActivityConsole } from "./ActivityConsole";
 import { LabSceneCanvas } from "../scene/LabSceneCanvas";
 import { WebMcpRegistrar } from "../webmcp/WebMcpRegistrar";
-import { BackendStatus } from "./BackendStatus";
 import { IconRail } from "./IconRail";
 import { LabStatePanel } from "./LabStatePanel";
 import { LanguageToggle } from "./LanguageToggle";
@@ -93,17 +92,13 @@ export function PageShell() {
         <ObservationPanel />
         {mode === "manual" ? <ManualToolRunner /> : <StarterPromptButton />}
 
-        <section className="glass-panel p-5">
-          <h2 className="text-sm font-medium tracking-wide text-slate-200">
-            {t(uiLang, "backendHealth")}
-          </h2>
-          <div className="mt-3 text-xs">
-            <BackendStatus />
-          </div>
-        </section>
       </aside>
 
-      <AgentActivityIndicator />
+      {/* The console sits bottom left, clear of the right column and of the
+          button that opens it on a narrow screen. */}
+      <div className="pointer-events-none absolute bottom-4 left-3 z-30 sm:left-5">
+        <ActivityConsole />
+      </div>
     </div>
   );
 }

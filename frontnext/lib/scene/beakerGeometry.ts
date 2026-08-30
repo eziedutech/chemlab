@@ -3,10 +3,14 @@
  * with the glass: the printed scale, the liquid, and the pouring stream.
  */
 
-export const OUTER_RADIUS = 0.5;
+/**
+ * Sized to the imported beaker: the model is 12.6 cm tall and 11.04 cm across,
+ * and it is scaled by height, so the radius follows from that ratio.
+ */
+export const OUTER_RADIUS = 0.4;
 export const WALL_HEIGHT = 0.92;
 export const BASE_HEIGHT = 0.024;
-export const LIQUID_RADIUS = OUTER_RADIUS - 0.025;
+export const LIQUID_RADIUS = OUTER_RADIUS - 0.03;
 
 /** Volume that fills the beaker to the brim, used to map millilitres to height. */
 export const FULL_VOLUME_ML = 250;

@@ -6,7 +6,8 @@
  * lab uses one instead of just eyeballing the beaker.
  */
 
-export const CYLINDER_RADIUS = 0.115;
+/** Sized to the imported measuring cylinder, 20.63 cm tall by 5.29 across. */
+export const CYLINDER_RADIUS = 0.105;
 export const CYLINDER_HEIGHT = 0.82;
 export const CYLINDER_BASE = 0.022;
 export const CYLINDER_MAX_ML = 250;

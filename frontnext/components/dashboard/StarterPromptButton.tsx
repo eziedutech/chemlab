@@ -46,7 +46,10 @@ export function StarterPromptButton({ bare = false }: { bare?: boolean }) {
         </h2>
         {button}
       </div>
-      <pre className="mt-4 max-h-40 overflow-auto whitespace-pre-wrap rounded-lg border border-white/10 bg-slate-950/50 p-4 text-xs leading-relaxed text-slate-400">
+      <p className="mt-1.5 text-xs leading-relaxed text-slate-400">
+        {t(uiLang, "starterHint")}
+      </p>
+      <pre className="mt-3 max-h-40 overflow-auto whitespace-pre-wrap rounded-lg border border-white/10 bg-slate-950/50 p-4 text-xs leading-relaxed text-slate-400">
         {STARTER_PROMPT}
       </pre>
     </section>

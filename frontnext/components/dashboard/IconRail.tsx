@@ -9,6 +9,7 @@ import {
 } from "../../lib/reactions/reactionDefinitions";
 import { toolDescriptors } from "../../lib/webmcp/registerTools";
 import { useLabStore, type Topic } from "../../store/labStore";
+import { BackendStatus } from "./BackendStatus";
 import { GlassModal } from "./GlassModal";
 import { StarterPromptButton } from "./StarterPromptButton";
 
@@ -115,6 +116,12 @@ export function IconRail() {
             <div className="space-y-4 text-sm leading-relaxed text-slate-300">
               <p>{t(uiLang, "aboutBody")}</p>
               <p className="text-slate-400">{t(uiLang, "aboutJudges")}</p>
+              <div className="border-t border-white/[0.07] pt-4 text-xs">
+                <span className="text-slate-400">{t(uiLang, "backendHealth")}</span>
+                <div className="mt-1">
+                  <BackendStatus />
+                </div>
+              </div>
             </div>
           )}
 

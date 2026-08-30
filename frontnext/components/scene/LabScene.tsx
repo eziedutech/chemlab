@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, OrbitControls } from "@react-three/drei";
 import { COUNTER_HEIGHT, LabRoom } from "./LabRoom";
@@ -62,7 +63,11 @@ export function LabScene() {
         <LabRoom />
       </group>
 
-      <TopicScene />
+      {/* The glassware model loads asynchronously; until it arrives the scene
+          simply renders without it. */}
+      <Suspense fallback={null}>
+        <TopicScene />
+      </Suspense>
 
       <ContactShadows
         position={[0, 0.001, 0]}

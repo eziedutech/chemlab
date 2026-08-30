@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { t } from "../../lib/i18n";
 import { useLabStore } from "../../store/labStore";
 
@@ -16,9 +17,17 @@ interface GlassModalProps {
  * Escape closes it, focus is not trapped because nothing inside is a form that
  * would strand a keyboard user, and the backdrop is a blur rather than a black
  * sheet so the lab stays visible behind it.
+ *
+ * It renders through a portal on purpose. A fixed element is positioned
+ * against its nearest transformed ancestor rather than the viewport, and the
+ * icon rail that opens this is centred with a transform, which collapsed the
+ * dialog into a sliver the width of the rail.
  */
 export function GlassModal({ title, onClose, children }: GlassModalProps) {
   const uiLang = useLabStore((state) => state.uiLang);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -28,9 +37,11 @@ export function GlassModal({ title, onClose, children }: GlassModalProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -54,6 +65,7 @@ export function GlassModal({ title, onClose, children }: GlassModalProps) {
         </div>
         <div className="overflow-y-auto px-6 py-5">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

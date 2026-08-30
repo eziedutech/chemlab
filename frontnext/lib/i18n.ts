@@ -55,9 +55,13 @@ const STRINGS = {
   runnerResult: { id: "Hasil", en: "Result" },
   runnerInvalidJson: { id: "Argumen bukan JSON yang sah.", en: "The arguments are not valid JSON." },
 
-  starterTitle: { id: "Prompt awal untuk agent", en: "Starter prompt for the agent" },
-  starterCopy: { id: "Salin prompt awal", en: "Copy starter prompt" },
+  starterTitle: { id: "Contoh prompt", en: "Prompt example" },
+  starterCopy: { id: "Salin contoh", en: "Copy example" },
   starterCopied: { id: "Tersalin", en: "Copied" },
+  starterHint: {
+    id: "Contoh saja. Bicara ke agent dengan kalimatmu sendiri, urutannya bebas.",
+    en: "An example, not a script. Talk to the agent in your own words, in any order.",
+  },
 
   safetyWarning: { id: "Peringatan keselamatan", en: "Safety warning" },
   safetyNote: { id: "Catatan keselamatan", en: "Safety note" },
@@ -93,8 +97,8 @@ const STRINGS = {
     en: "For judges: open this page in the ChatGPT in-app browser, or Chrome 149+ with chrome://flags/#enable-webmcp-testing. Without WebMCP support, switch to Manual mode and run the tools straight from the right panel.",
   },
   commandsBody: {
-    id: "Kalimat berikut cukup untuk menjalankan seluruh demo. Ucapkan ke agent dengan bahasa bebas, tidak harus persis.",
-    en: "These are enough to run the whole demo. Say them to the agent in your own words, they do not have to match exactly.",
+    id: "Contoh berikut menjalankan seluruh demo, tapi bukan mantra. Agent memahami maksud, jadi ucapkan dengan kalimatmu sendiri dan dengan urutan yang kamu mau.",
+    en: "The example below runs the whole demo, but it is not an incantation. The agent works from intent, so say it in your own words, in whatever order you like.",
   },
   topicsBody: {
     id: "Tiga topik yang dikunci, beserta bahan yang tersedia di masing-masing.",
@@ -144,14 +148,14 @@ export function initialLang(): UiLang {
 }
 
 /** The prompt a judge can paste into the agent to drive the whole demo. */
-export const STARTER_PROMPT = `You are my chemistry lab instructor. This page gives you seven tools.
+export const STARTER_PROMPT = `You are my chemistry lab instructor. This page gives you tools for a 3D lab.
 
-1. Call get_lab_state to see what is on the bench.
-2. Switch to the acid and base topic, then mix cuka with baking_soda, 150 ml.
-3. Tell me what you observe, then explain the reaction step by step from step 1 to step 4.
-4. Raise a safety alert about why this reaction is done in an open beaker.
-5. Switch to the electrolyte topic and compare salt water against sugar water, and tell me what the lamp does in each case.
-6. Switch to the density topic and show me an egg in fresh water, then in salt water.
-7. Finish by writing the lab report.
+Have a look at what is on the bench, then take me through the acid and base
+experiment: mix vinegar with baking soda, tell me what you see, and explain the
+reaction step by step. Warn me about anything worth being careful with.
 
-Narrate what you are doing as you go, in the language I am using.`;
+After that I would like to compare salt water with sugar water and see what the
+lamp does, and then watch an egg in fresh water and in salt water.
+
+Write up the lab report when we are done. Narrate as you go, in the language I
+am using.`;

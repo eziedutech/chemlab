@@ -15,10 +15,12 @@ export interface BeakerState {
 }
 
 export interface AgentActivity {
-  /** Monotonic id, used as the React key and by the auto dismiss timer. */
+  /** Monotonic id, used as the React key. */
   id: number;
   toolName: string;
   at: number;
+  /** Filled in when the call returns, so a failure is visible as a failure. */
+  status: "running" | "ok" | "failed";
   /**
    * Who made the call. The toast is the visible proof that a tool call really
    * happened, so a call made by hand from the page must not be dressed up as
@@ -156,8 +158,13 @@ interface LabState {
    */
   mode: "webmcp" | "manual";
 
-  /** Called on the first line of every tool execute, so the toast is proof of a real call. */
+  /**
+   * Called on the first line of every tool execute. The console it feeds is the
+   * visible proof that a real tool call happened.
+   */
   pushAgentActivity: (toolName: string) => void;
+  /** Records how the most recent call to that tool ended. */
+  markActivityResult: (toolName: string, ok: boolean) => void;
   /** Marks the next tool call as one a person started from the page. */
   markNextCallManual: () => void;
   dropAgentActivity: (id: number) => void;
@@ -219,9 +226,29 @@ export const useLabStore = create<LabState>((set) => ({
       return {
         agentActivity: [
           ...state.agentActivity,
-          { id: ++activityCounter, toolName, at: Date.now(), origin },
-        ].slice(-4),
+          {
+            id: ++activityCounter,
+            toolName,
+            at: Date.now(),
+            status: "running" as const,
+            origin,
+          },
+          // A console keeps its history, unlike the toast it replaced, but not
+          // without limit.
+        ].slice(-60),
       };
+    }),
+
+  markActivityResult: (toolName, ok) =>
+    set((state) => {
+      const index = [...state.agentActivity]
+        .reverse()
+        .findIndex((entry) => entry.toolName === toolName && entry.status === "running");
+      if (index === -1) return {};
+      const target = state.agentActivity.length - 1 - index;
+      const updated = [...state.agentActivity];
+      updated[target] = { ...updated[target], status: ok ? "ok" : "failed" };
+      return { agentActivity: updated };
     }),
 
   markNextCallManual: () => {

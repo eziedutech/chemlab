@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { DoubleSide, Group, Mesh, MeshStandardMaterial } from "three";
 import { surfaceHeight } from "../../lib/scene/beakerGeometry";
+import { GLASSWARE_NODES, useGlasswarePiece } from "../../lib/scene/glassware";
 import { createScaleTexture } from "../../lib/scene/scaleTexture";
 import {
   CYLINDER_BASE,
@@ -84,6 +85,7 @@ export function Vessel({ job, index, total }: VesselProps) {
   const fill = useRef(0);
 
   const isScoop = job.kind === "scoop";
+  const piece = useGlasswarePiece(GLASSWARE_NODES.cylinder);
   const slot = useMemo(() => vesselSlot(index, total), [index, total]);
   /** Mouth height when the vessel stands on the bench. */
   const restHeight = isScoop ? 0.16 : CYLINDER_HEIGHT;
@@ -256,34 +258,56 @@ export function Vessel({ job, index, total }: VesselProps) {
             </group>
           ) : (
             <group>
-              {/* Foot, so a tall narrow cylinder can stand up. */}
-              <mesh position={[0, 0.012, 0]}>
-                <cylinderGeometry args={[CYLINDER_RADIUS * 1.55, CYLINDER_RADIUS * 1.7, 0.024, 28]} />
-                <meshPhysicalMaterial
-                  color="#cfe4f2"
-                  transparent
-                  opacity={0.4}
-                  roughness={0.1}
-                  ior={1.45}
-                />
-              </mesh>
-
-              {/* Glass wall. */}
-              <mesh position={[0, CYLINDER_HEIGHT / 2, 0]}>
-                <cylinderGeometry
-                  args={[CYLINDER_RADIUS, CYLINDER_RADIUS, CYLINDER_HEIGHT, 32, 1, true]}
-                />
-                <meshPhysicalMaterial
-                  color="#cfe4f2"
-                  transparent
-                  opacity={0.22}
-                  roughness={0.06}
-                  metalness={0}
-                  ior={1.45}
-                  reflectivity={0.4}
-                  side={DoubleSide}
-                />
-              </mesh>
+              {/* The imported cylinder, which brings its own foot and lip.
+                  The primitive below stands in if the model has not loaded. */}
+              {piece ? (
+                <mesh
+                  geometry={piece.mesh.geometry}
+                  scale={CYLINDER_HEIGHT / piece.height}
+                >
+                  <meshPhysicalMaterial
+                    color="#dceaf5"
+                    transparent
+                    opacity={0.26}
+                    roughness={0.04}
+                    metalness={0}
+                    ior={1.5}
+                    reflectivity={0.55}
+                    envMapIntensity={1.6}
+                    side={DoubleSide}
+                  />
+                </mesh>
+              ) : (
+                <>
+                  <mesh position={[0, 0.012, 0]}>
+                    <cylinderGeometry
+                      args={[CYLINDER_RADIUS * 1.55, CYLINDER_RADIUS * 1.7, 0.024, 28]}
+                    />
+                    <meshPhysicalMaterial
+                      color="#cfe4f2"
+                      transparent
+                      opacity={0.4}
+                      roughness={0.1}
+                      ior={1.45}
+                    />
+                  </mesh>
+                  <mesh position={[0, CYLINDER_HEIGHT / 2, 0]}>
+                    <cylinderGeometry
+                      args={[CYLINDER_RADIUS, CYLINDER_RADIUS, CYLINDER_HEIGHT, 32, 1, true]}
+                    />
+                    <meshPhysicalMaterial
+                      color="#cfe4f2"
+                      transparent
+                      opacity={0.22}
+                      roughness={0.06}
+                      metalness={0}
+                      ior={1.45}
+                      reflectivity={0.4}
+                      side={DoubleSide}
+                    />
+                  </mesh>
+                </>
+              )}
 
               {/* Printed volume scale. */}
               {scale && (
@@ -302,15 +326,30 @@ export function Vessel({ job, index, total }: VesselProps) {
                 </mesh>
               )}
 
-              {/* Base and rim. */}
-              <mesh position={[0, CYLINDER_BASE / 2 + 0.024, 0]}>
-                <cylinderGeometry args={[CYLINDER_RADIUS, CYLINDER_RADIUS, CYLINDER_BASE, 32]} />
-                <meshPhysicalMaterial color="#cfe4f2" transparent opacity={0.35} roughness={0.08} />
-              </mesh>
-              <mesh position={[0, CYLINDER_HEIGHT, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                <torusGeometry args={[CYLINDER_RADIUS, 0.011, 10, 32]} />
-                <meshPhysicalMaterial color="#dcecf7" transparent opacity={0.5} roughness={0.1} />
-              </mesh>
+              {!piece && (
+                <>
+                  <mesh position={[0, CYLINDER_BASE / 2 + 0.024, 0]}>
+                    <cylinderGeometry
+                      args={[CYLINDER_RADIUS, CYLINDER_RADIUS, CYLINDER_BASE, 32]}
+                    />
+                    <meshPhysicalMaterial
+                      color="#cfe4f2"
+                      transparent
+                      opacity={0.35}
+                      roughness={0.08}
+                    />
+                  </mesh>
+                  <mesh position={[0, CYLINDER_HEIGHT, 0]} rotation={[Math.PI / 2, 0, 0]}>
+                    <torusGeometry args={[CYLINDER_RADIUS, 0.011, 10, 32]} />
+                    <meshPhysicalMaterial
+                      color="#dcecf7"
+                      transparent
+                      opacity={0.5}
+                      roughness={0.1}
+                    />
+                  </mesh>
+                </>
+              )}
 
               {/* The measured liquid. */}
               <mesh ref={liquidRef} visible={false}>
