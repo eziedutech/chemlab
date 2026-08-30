@@ -177,6 +177,11 @@ cd frontnext && npm install && npm run dev
 The project is deployed with Dokploy on a self hosted VPS, with HTTPS issued by
 Let's Encrypt.
 
+Either deploy both services from `docker-compose.prod.yml` as one Compose
+service, or create two applications, one with build path `./backrust` and one
+with `./frontnext`. Both work, and neither needs build arguments: the frontend
+reads `API_BASE_URL` from its environment at runtime through `/runtime-config`.
+
 Two services, on two hostnames:
 
 | Service | Hostname |
@@ -199,8 +204,8 @@ like `api.chemlab.eziedutech.dev` would not be covered.
    LLM_API_KEY=<provider key>
    ALLOWED_ORIGINS=https://chemlab.eziedutech.dev
 
-   # frontnext, a build argument rather than a runtime variable
-   NEXT_PUBLIC_API_BASE_URL=https://apichemlab.eziedutech.dev
+   # frontnext
+   API_BASE_URL=https://apichemlab.eziedutech.dev
    ```
 
 3. `LLM_API_KEY` belongs to the backend only and is never exposed to the
@@ -209,8 +214,9 @@ like `api.chemlab.eziedutech.dev` would not be covered.
 5. Keep `ALLOWED_ORIGINS` set to the frontend origin, so CORS is restricted
    rather than wildcarded. Leaving it empty falls back to permissive, which is
    for local development only.
-6. Rebuild the frontend whenever `NEXT_PUBLIC_API_BASE_URL` changes, because
-   `NEXT_PUBLIC_` values are inlined at build time and not read at runtime.
+6. `API_BASE_URL` takes effect on restart. `NEXT_PUBLIC_API_BASE_URL` is the
+   build time fallback, and changing that one does need a rebuild, since
+   `NEXT_PUBLIC_` values are compiled into the bundle.
 
 Use `docker-compose.prod.yml` for the deployment rather than the file used
 locally. They differ in one thing that matters on a shared machine: the
@@ -223,9 +229,8 @@ trigger type `On Push`, then turn Autodeploy on. With the GitHub app connected
 the webhook is created for you, so nothing has to be added to the repository by
 hand.
 
-One thing to remember on later deploys: changing `NEXT_PUBLIC_API_BASE_URL`
-needs a Rebuild rather than a Restart, since the value is compiled into the
-bundle.
+Pointing the frontend at a different backend later is a change to
+`API_BASE_URL` and a restart, not a rebuild.
 
 ## Configuration
 
@@ -235,7 +240,8 @@ bundle.
 | `LLM_MODEL` | backrust | Model name as the provider spells it |
 | `LLM_API_KEY` | backrust | Provider credential, server side only |
 | `ALLOWED_ORIGINS` | backrust | Comma separated CORS origins for production |
-| `NEXT_PUBLIC_API_BASE_URL` | frontnext | Base URL of the backend, inlined at build time |
+| `API_BASE_URL` | frontnext | Base URL of the backend, read at runtime. Preferred |
+| `NEXT_PUBLIC_API_BASE_URL` | frontnext | Same thing baked in at build time, used as the fallback |
 
 The backend is provider agnostic. Any endpoint that implements
 `POST /v1/chat/completions` in the OpenAI format works, so switching providers is

@@ -32,6 +32,9 @@ services:
     container_name: ezichemlab-frontnext
     environment:
       PORT: 3000
+      # Read at runtime, so pointing the frontend at another backend is a
+      # restart rather than a rebuild.
+      API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8080}
     ports:
       - "3000:3000"
     depends_on:
