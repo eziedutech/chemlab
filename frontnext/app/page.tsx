@@ -1,6 +1,7 @@
 import { AgentActivityIndicator } from "../components/AgentActivityIndicator";
 import { ToolList } from "../components/dashboard/ToolList";
 import { WebMcpStatusBadge } from "../components/dashboard/WebMcpStatusBadge";
+import { LabSceneCanvas } from "../components/scene/LabSceneCanvas";
 import { WebMcpRegistrar } from "../components/webmcp/WebMcpRegistrar";
 
 const apiBaseUrl =
@@ -26,6 +27,8 @@ export default function Home() {
           instructor, powered by WebMCP.
         </p>
       </header>
+
+      <LabSceneCanvas />
 
       <section className="glass-panel p-6">
         <h2 className="text-sm font-medium tracking-wide text-slate-200">
