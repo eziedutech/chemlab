@@ -41,6 +41,7 @@ pub async fn generate_lab_report(
             },
             learning_points: Vec::new(),
             source: Source::Fallback,
+            model: None,
         });
     }
 
@@ -70,17 +71,18 @@ pub async fn generate_lab_report(
 
     let (system, user) = fallback::report_prompt(&normalized, lang);
     match state.llm.complete(&system, &user).await {
-        Ok(text) => {
+        Ok(completion) => {
             let response = LabReportResponse {
-                formatted_report: text,
+                formatted_report: completion.text,
                 learning_points: fallback::lab_report(&normalized, lang).learning_points,
                 source: Source::Llm,
+                model: Some(completion.model),
             };
             state.cache.put(key, response.clone());
             Json(response)
         }
         Err(error) => {
-            tracing::warn!("provider call failed ({error}), answering from the fallback");
+            tracing::warn!("every provider failed ({error}), answering from the fallback");
             Json(fallback::lab_report(&normalized, lang))
         }
     }

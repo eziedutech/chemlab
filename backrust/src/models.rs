@@ -60,6 +60,10 @@ pub struct LabReportResponse {
     pub formatted_report: String,
     pub learning_points: Vec<String>,
     pub source: Source,
+    /// Which model wrote it, when one did. Named so a judge can see that the
+    /// answer came from the provider the deployment claims to use.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub model: Option<String>,
 }
 
 /// Language of the answer. Anything unrecognised is treated as Indonesian,

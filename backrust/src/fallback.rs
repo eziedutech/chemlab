@@ -119,6 +119,7 @@ pub fn lab_report(request: &LabReportRequest, lang: Lang) -> LabReportResponse {
         formatted_report,
         learning_points: learning_points(&request.topic, lang),
         source: Source::Fallback,
+        model: None,
     }
 }
 

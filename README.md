@@ -248,6 +248,8 @@ Pointing the frontend at a different backend later is a change to
 | `LLM_BASE_URL` | backrust | Base URL of an OpenAI compatible provider |
 | `LLM_MODEL` | backrust | Model name as the provider spells it |
 | `LLM_API_KEY` | backrust | Provider credential, server side only |
+| `LLM_BASE_URL_2`, `LLM_MODEL_2`, `LLM_API_KEY_2` | backrust | A second provider, tried when the first fails |
+| `LLM_BASE_URL_3`, `LLM_MODEL_3`, `LLM_API_KEY_3` | backrust | A third, and so on up to five |
 | `ALLOWED_ORIGINS` | backrust | Comma separated CORS origins for production |
 | `API_BASE_URL` | frontnext | Base URL of the backend, read at runtime. Preferred |
 | `NEXT_PUBLIC_API_BASE_URL` | frontnext | Same thing baked in at build time, used as the fallback |
@@ -255,6 +257,13 @@ Pointing the frontend at a different backend later is a change to
 The backend is provider agnostic. Any endpoint that implements
 `POST /v1/chat/completions` in the OpenAI format works, so switching providers is
 an environment change and not a code change.
+
+More than one can be configured. Numbered sets are tried in order, and a
+provider that is out of quota, unreachable, or slow is passed over for the next
+one, which matters when judging runs for three weeks on a single account. When
+every one of them fails the report still comes back, assembled from the
+student's own observations. `GET /health` reports how many are configured, and a
+report that a model wrote names the model in its `model` field.
 
 ## Curriculum coverage
 

@@ -17,8 +17,9 @@ impl AppState {
         let llm = LlmClient::new();
         if llm.is_configured() {
             tracing::info!(
-                "provider configured, model {}",
-                llm.model().unwrap_or("unknown")
+                "{} provider(s) configured, tried in order: {}",
+                llm.provider_count(),
+                llm.models().join(", ")
             );
         } else {
             tracing::warn!(

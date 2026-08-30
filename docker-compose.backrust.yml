@@ -10,6 +10,13 @@ services:
       LLM_BASE_URL: ${LLM_BASE_URL}
       LLM_MODEL: ${LLM_MODEL}
       LLM_API_KEY: ${LLM_API_KEY}
+      # Optional backups, tried in order when the one above fails.
+      LLM_BASE_URL_2: ${LLM_BASE_URL_2:-}
+      LLM_MODEL_2: ${LLM_MODEL_2:-}
+      LLM_API_KEY_2: ${LLM_API_KEY_2:-}
+      LLM_BASE_URL_3: ${LLM_BASE_URL_3:-}
+      LLM_MODEL_3: ${LLM_MODEL_3:-}
+      LLM_API_KEY_3: ${LLM_API_KEY_3:-}
       # Explicit origin rather than a wildcard.
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
       RUST_LOG: ${RUST_LOG:-info}
