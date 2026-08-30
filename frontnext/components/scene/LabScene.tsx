@@ -18,7 +18,7 @@ export function LabScene() {
       // Capping the pixel ratio is what keeps a school laptop at a usable frame rate.
       dpr={[1, 1.75]}
       gl={{ antialias: true, powerPreference: "high-performance" }}
-      camera={{ position: [1.85, 1.55, 3.05], fov: 36 }}
+      camera={{ position: [1.95, 1.55, 3.15], fov: 36 }}
     >
       <color attach="background" args={["#0b1220"]} />
 
@@ -71,7 +71,7 @@ export function LabScene() {
         enablePan={false}
         enableDamping
         dampingFactor={0.08}
-        target={[0, 0.62, 0]}
+        target={[-0.2, 0.58, 0]}
         minDistance={2}
         maxDistance={6}
         // Stop the camera from dropping below the bench.

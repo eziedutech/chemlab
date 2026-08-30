@@ -8,7 +8,12 @@ import {
   SUBSTANCES,
   TOPIC_SUBSTANCES,
 } from "../../reactions/reactionDefinitions";
-import { POUR_DURATION_MS, useLabStore, type PourJob } from "../../../store/labStore";
+import {
+  measuringDuration,
+  POUR_DURATION_MS,
+  useLabStore,
+  type PourJob,
+} from "../../../store/labStore";
 
 const BEAKER_CAPACITY_ML = 250;
 const DEFAULT_AMOUNT_ML = 50;
@@ -16,7 +21,7 @@ const DEFAULT_AMOUNT_ML = 50;
 export const mixSubstances: ToolDescriptor = {
   name: "mix_substances",
   description:
-    "Mix two substances in the 3D simulation. Each reagent is lifted, carried over the beaker and poured in, then the liquid takes on the colour, bubbles or precipitate the reaction produces.",
+    "Mix two substances in the 3D simulation. Each one is first measured out on the bench, liquids into graduated cylinders and powders onto a spatula, then added to the beaker one at a time, and the liquid takes on the colour, bubbles or precipitate the reaction produces.",
   inputSchema: {
     type: "object",
     properties: {
@@ -24,7 +29,8 @@ export const mixSubstances: ToolDescriptor = {
       substance_b: { type: "string", description: "Second substance, for example 'baking_soda'" },
       amount_ml: {
         type: "number",
-        description: "Total volume of the mixture in millilitres",
+        description:
+          "Total volume of liquid to measure out, in millilitres. Powders and solid objects are not measured by volume.",
         minimum: 1,
         maximum: 500,
       },
@@ -74,18 +80,37 @@ export const mixSubstances: ToolDescriptor = {
     const startingVolume = store.beaker.volumeMl;
     const headroom = Math.max(0, BEAKER_CAPACITY_ML - startingVolume);
 
-    // Only add what is not already in the beaker.
-    const toPour = [a as string, b as string].filter(
+    // Measure out what is not already in the beaker. If both are in there
+    // already the call is a top up, so both are measured again, except an
+    // object, which does not go in twice.
+    const missing = [a as string, b as string].filter(
       (name) => !store.beaker.substances.includes(name),
     );
-    // An egg displaces liquid, it does not add any, so only pourable reagents
-    // count towards the volume.
-    const pourableCount = toPour.filter(
-      (name) => substanceKind(name) !== "object",
+    const names =
+      missing.length > 0
+        ? missing
+        : [a as string, b as string].filter(
+            (name) => substanceKind(name) !== "object",
+          );
+
+    if (names.length === 0) {
+      return {
+        success: false,
+        reason: "nothing_to_add",
+        beaker: store.beaker.substances,
+        suggested_next_step: "Call reset_experiment to start this topic over.",
+      };
+    }
+
+    // Volume comes from the liquids alone. A spoonful of powder dissolves into
+    // the solution and an egg displaces liquid rather than adding any, so
+    // neither is measured in millilitres.
+    const liquidCount = names.filter(
+      (name) => substanceKind(name) === "liquid",
     ).length;
     const added =
-      pourableCount === 0 ? 0 : Math.min(Math.max(1, requested), headroom);
-    const clamped = pourableCount > 0 && added < requested;
+      liquidCount === 0 ? 0 : Math.min(Math.max(1, requested), headroom);
+    const clamped = liquidCount > 0 && added < requested;
 
     const finalVolume = startingVolume + added;
     const outcome = {
@@ -94,46 +119,36 @@ export const mixSubstances: ToolDescriptor = {
       objectState: reaction.objectState ?? null,
     };
 
-    if (toPour.length === 0) {
-      // Nothing left to pour, so the reaction simply resolves in place.
-      useLabStore.getState().enqueuePours([
-        {
-          substance: a as string,
-          kind: "pour",
-          color: substanceColor(a as string),
-          resultColor: reaction.resultColor,
-          resultVolumeMl: finalVolume,
-          resultBubbles: reaction.hasBubbles,
-          resultPrecipitate: reaction.hasPrecipitate,
-          outcome,
-        },
-      ]);
-    } else {
-      const share = pourableCount > 0 ? added / pourableCount : 0;
-      let runningVolume = startingVolume;
-      const jobs: Omit<PourJob, "id">[] = toPour.map((name, index) => {
-        const isLast = index === toPour.length - 1;
-        const isObject = substanceKind(name) === "object";
-        if (!isObject) runningVolume += share;
-        return {
-          substance: name,
-          kind: isObject ? ("drop" as const) : ("pour" as const),
-          color: substanceColor(name),
-          // Until the last reagent lands, the beaker just holds what was added
-          // so far. The reaction colour only appears once both are in.
-          resultColor: isLast ? reaction.resultColor : substanceColor(name),
-          resultVolumeMl: runningVolume,
-          resultBubbles: isLast ? reaction.hasBubbles : false,
-          resultPrecipitate: isLast ? reaction.hasPrecipitate : false,
-          outcome: isLast ? outcome : undefined,
-        };
-      });
-      useLabStore.getState().enqueuePours(jobs);
-    }
+    const share = liquidCount > 0 ? added / liquidCount : 0;
+    let runningVolume = startingVolume;
 
+    const jobs: Omit<PourJob, "id">[] = names.map((name, index) => {
+      const isLast = index === names.length - 1;
+      const kindOfSubstance = substanceKind(name);
+      const isLiquid = kindOfSubstance === "liquid";
+      if (isLiquid) runningVolume += share;
+      return {
+        substance: name,
+        kind:
+          kindOfSubstance === "object"
+            ? ("drop" as const)
+            : kindOfSubstance === "powder"
+              ? ("scoop" as const)
+              : ("pour" as const),
+        color: substanceColor(name),
+        measuredMl: isLiquid ? share : 0,
+        // Until the last reagent lands, the beaker just holds what was added
+        // so far. The reaction colour only appears once both are in.
+        resultColor: isLast ? reaction.resultColor : substanceColor(name),
+        resultVolumeMl: isLast ? finalVolume : runningVolume,
+        resultBubbles: isLast ? reaction.hasBubbles : false,
+        resultPrecipitate: isLast ? reaction.hasPrecipitate : false,
+        outcome: isLast ? outcome : undefined,
+      };
+    });
+
+    useLabStore.getState().startMix(jobs);
     useLabStore.getState().appendObservation(reaction.observationEn);
-
-    const pourCount = Math.max(1, toPour.length);
 
     return {
       success: true,
@@ -157,8 +172,21 @@ export const mixSubstances: ToolDescriptor = {
       object_state: reaction.objectState ?? null,
       observation: reaction.observationEn,
       observation_id: reaction.observationId,
-      // The pour is animated, so tell the agent how long the scene is busy.
-      animation_ms: pourCount * POUR_DURATION_MS,
+      // What the bench shows: each vessel and the measure it was filled to.
+      measured_out: jobs.map((job) => ({
+        substance: job.substance,
+        vessel:
+          job.kind === "pour"
+            ? "measuring cylinder"
+            : job.kind === "scoop"
+              ? "spatula"
+              : "by hand",
+        measured_ml: job.measuredMl || null,
+      })),
+      // Everything is measured out first, then added one vessel at a time, so
+      // tell the agent how long the scene is busy before it acts again.
+      animation_ms:
+        measuringDuration(jobs.length) + jobs.length * POUR_DURATION_MS,
     };
   },
 };

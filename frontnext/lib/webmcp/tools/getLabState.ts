@@ -25,8 +25,14 @@ export const getLabState: ToolDescriptor = {
       temperature_c: state.temperatureC,
       lamp_brightness: state.lampBrightness,
       object_state: state.objectState,
-      /** True while the scene is still animating a pour the agent asked for. */
-      busy: state.pourQueue.length > 0,
+      /**
+       * True while the scene is still carrying out a mix the agent asked for,
+       * which covers measuring the reagents out as well as adding them.
+       */
+      busy:
+        state.pourQueue.length > 0 ||
+        (state.mix !== null && state.mix.stage !== "done"),
+      mix_stage: state.mix ? state.mix.stage : null,
       observation_log: state.observationLog,
       safety_alert: state.safetyAlert,
       available_substances: TOPIC_SUBSTANCES[state.activeTopic],

@@ -46,9 +46,14 @@ export interface PourJob {
    * in as an object. Each is animated by a different actor in the scene, and
    * both work through this one queue so the order stays right.
    */
-  kind: "pour" | "drop";
-  /** Colour of the reagent itself, used for the bottle and the stream. */
+  kind: "pour" | "scoop" | "drop";
+  /** Colour of the reagent itself, used for the vessel and the stream. */
   color: string;
+  /**
+   * How much this vessel was measured out to hold. Zero for a powder on a
+   * spatula and for an object, which are not measured by volume.
+   */
+  measuredMl: number;
   /** Beaker contents once this pour has landed. */
   resultColor: string;
   resultVolumeMl: number;
@@ -66,6 +71,22 @@ export interface PourJob {
   };
 }
 
+/**
+ * One call to mix_substances, from measuring to the last reagent going in.
+ *
+ * Everything is measured out first and left standing on the bench, so a
+ * student can see each substance and how much of it there is before anything
+ * is combined. Only then are the vessels emptied into the beaker, one at a
+ * time.
+ */
+export interface MixBatch {
+  id: number;
+  jobs: PourJob[];
+  stage: "measuring" | "adding" | "done";
+  /** Clock the measuring animation runs against. */
+  startedAt: number;
+}
+
 export const EMPTY_BEAKER: BeakerState = {
   substances: [],
   color: "#dfe8ff",
@@ -76,6 +97,16 @@ export const EMPTY_BEAKER: BeakerState = {
 
 /** How long one reagent takes: lift, carry, tip, pour, and set back down. */
 export const POUR_DURATION_MS = 3200;
+/** How long one vessel takes to fill to its measure. */
+export const MEASURE_DURATION_MS = 1500;
+/** Gap between one vessel starting to fill and the next. */
+export const MEASURE_STAGGER_MS = 320;
+
+/** Total time spent measuring a batch of this many vessels. */
+export function measuringDuration(vesselCount: number): number {
+  if (vesselCount <= 0) return 0;
+  return MEASURE_DURATION_MS + MEASURE_STAGGER_MS * (vesselCount - 1) + 400;
+}
 
 interface LabState {
   activeSubject: Subject;
@@ -90,6 +121,8 @@ interface LabState {
   lampBrightness: number;
   /** Density topic: what the egg is doing. */
   objectState: "floats" | "sinks" | null;
+  /** The mix currently being carried out, or the last one that finished. */
+  mix: MixBatch | null;
   pourQueue: PourJob[];
 
   /** Called on the first line of every tool execute, so the toast is proof of a real call. */
@@ -101,7 +134,10 @@ interface LabState {
   appendObservation: (entry: string) => void;
   resetExperiment: (keepObservationLog?: boolean) => void;
 
-  enqueuePours: (jobs: Omit<PourJob, "id">[]) => number[];
+  /** Lay out the vessels and start filling them. */
+  startMix: (jobs: Omit<PourJob, "id">[]) => number;
+  /** Called by the scene once every vessel has been measured out. */
+  beginAdding: () => void;
   /** Called by the scene at the moment a bottle actually tips over the beaker. */
   applyPour: (id: number) => void;
   /** Called by the scene once a bottle has been set back down. */
@@ -115,6 +151,7 @@ interface LabState {
 
 let activityCounter = 0;
 let pourCounter = 0;
+let batchCounter = 0;
 
 export const useLabStore = create<LabState>((set) => ({
   activeSubject: "kimia",
@@ -127,6 +164,7 @@ export const useLabStore = create<LabState>((set) => ({
   webmcp: { detected: false, toolCount: 0, checked: false },
   lampBrightness: 0,
   objectState: null,
+  mix: null,
   pourQueue: [],
 
   pushAgentActivity: (toolName) =>
@@ -153,6 +191,7 @@ export const useLabStore = create<LabState>((set) => ({
       safetyAlert: null,
       lampBrightness: 0,
       objectState: null,
+      mix: null,
       pourQueue: [],
     }),
 
@@ -168,15 +207,35 @@ export const useLabStore = create<LabState>((set) => ({
       safetyAlert: null,
       lampBrightness: 0,
       objectState: null,
+      mix: null,
       pourQueue: [],
       observationLog: keepObservationLog ? state.observationLog : [],
     })),
 
-  enqueuePours: (jobs) => {
+  startMix: (jobs) => {
+    const batchId = ++batchCounter;
     const withIds = jobs.map((job) => ({ ...job, id: ++pourCounter }));
-    set((state) => ({ pourQueue: [...state.pourQueue, ...withIds] }));
-    return withIds.map((job) => job.id);
+    set({
+      mix: {
+        id: batchId,
+        jobs: withIds,
+        stage: "measuring",
+        startedAt: Date.now(),
+      },
+      pourQueue: [],
+    });
+    return batchId;
   },
+
+  beginAdding: () =>
+    set((state) =>
+      state.mix && state.mix.stage === "measuring"
+        ? {
+            mix: { ...state.mix, stage: "adding" },
+            pourQueue: state.mix.jobs,
+          }
+        : {},
+    ),
 
   applyPour: (id) =>
     set((state) => {
@@ -202,9 +261,16 @@ export const useLabStore = create<LabState>((set) => ({
     }),
 
   completePour: (id) =>
-    set((state) => ({
-      pourQueue: state.pourQueue.filter((item) => item.id !== id),
-    })),
+    set((state) => {
+      const remaining = state.pourQueue.filter((item) => item.id !== id);
+      return {
+        pourQueue: remaining,
+        mix:
+          state.mix && remaining.length === 0
+            ? { ...state.mix, stage: "done" as const }
+            : state.mix,
+      };
+    }),
 
   setReactionOutcome: ({ temperatureC, lampBrightness, objectState }) =>
     set((state) => ({
