@@ -1,0 +1,50 @@
+services:
+  backrust:
+    build:
+      context: ./backrust
+    environment:
+      PORT: 8080
+      LLM_BASE_URL: ${LLM_BASE_URL}
+      LLM_MODEL: ${LLM_MODEL}
+      LLM_API_KEY: ${LLM_API_KEY}
+      # Explicit origin rather than a wildcard.
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      RUST_LOG: ${RUST_LOG:-info}
+    # No published ports: the reverse proxy reaches the container over the
+    # shared network, and binding host ports would collide with anything else
+    # already running on the machine.
+    expose:
+      - "8080"
+    networks:
+      - dokploy-network
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  frontnext:
+    build:
+      context: ./frontnext
+      args:
+        # Inlined into the bundle at build time, so this has to be a build
+        # argument. Setting it only as a runtime variable leaves the deployed
+        # page calling localhost, and every backend call fails silently.
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+    environment:
+      PORT: 3000
+    expose:
+      - "3000"
+    networks:
+      - dokploy-network
+    depends_on:
+      - backrust
+    restart: unless-stopped
+
+# Dokploy routes traffic to compose services over this network, so both have to
+# join it. It is created by Dokploy itself, which is why it is external here.
+networks:
+  dokploy-network:
+    external: true

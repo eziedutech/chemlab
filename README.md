@@ -212,6 +212,16 @@ like `api.chemlab.eziedutech.dev` would not be covered.
 6. Rebuild the frontend whenever `NEXT_PUBLIC_API_BASE_URL` changes, because
    `NEXT_PUBLIC_` values are inlined at build time and not read at runtime.
 
+Use `docker-compose.prod.yml` for the deployment rather than the file used
+locally. They differ in one thing that matters on a shared machine: the
+production file publishes no host ports, and lets the reverse proxy reach each
+container over the shared network instead.
+
+Pushing to `main` redeploys, through the webhook Dokploy issues for the
+service. Point it at this repository, set the branch to `main` and the compose
+file to `docker-compose.prod.yml`, then add the webhook to the repository under
+Settings, Webhooks, with the content type set to `application/json`.
+
 ## Configuration
 
 | Variable | Service | Description |
