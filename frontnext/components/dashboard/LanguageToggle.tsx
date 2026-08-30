@@ -33,7 +33,7 @@ export function LanguageToggle() {
           className={`rounded-full px-2.5 py-1 uppercase tracking-wider transition ${
             uiLang === option
               ? "bg-white/10 text-slate-100"
-              : "text-slate-500 hover:text-slate-300"
+              : "text-slate-400 hover:text-slate-300"
           }`}
         >
           {option}

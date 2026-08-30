@@ -1,87 +1,109 @@
 "use client";
 
+import { useState } from "react";
 import { AgentActivityIndicator } from "../AgentActivityIndicator";
+import { LabSceneCanvas } from "../scene/LabSceneCanvas";
+import { WebMcpRegistrar } from "../webmcp/WebMcpRegistrar";
 import { BackendStatus } from "./BackendStatus";
+import { IconRail } from "./IconRail";
+import { LabStatePanel } from "./LabStatePanel";
 import { LanguageToggle } from "./LanguageToggle";
 import { ManualToolRunner } from "./ManualToolRunner";
+import { ModeToggle } from "./ModeToggle";
 import { ObservationPanel } from "./ObservationPanel";
 import { SafetyAlertBanner } from "./SafetyAlertBanner";
 import { StarterPromptButton } from "./StarterPromptButton";
-import { ToolList } from "./ToolList";
 import { WebMcpStatusBadge } from "./WebMcpStatusBadge";
-import { LabSceneCanvas } from "../scene/LabSceneCanvas";
-import { WebMcpRegistrar } from "../webmcp/WebMcpRegistrar";
 import { t } from "../../lib/i18n";
 import { useLabStore } from "../../store/labStore";
 
 /**
- * The page itself.
+ * The page.
  *
- * A client component because every panel below reads the interface language
- * from the store, and the language is only known once the URL can be read.
+ * The lab fills the window and everything else floats over it in glass, so the
+ * experiment is the subject rather than a thumbnail inside a document. The
+ * left rail is icons only for the same reason: reading material opens on
+ * demand instead of occupying the room.
  */
 export function PageShell() {
   const uiLang = useLabStore((state) => state.uiLang);
+  const mode = useLabStore((state) => state.mode);
+  const [panelOpen, setPanelOpen] = useState(false);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-7 px-6 py-14">
+    <div className="relative h-[100dvh] w-full overflow-hidden">
       <WebMcpRegistrar />
 
-      <header className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs uppercase tracking-[0.28em] text-slate-400">
+      {/* The lab itself, filling the window behind everything. */}
+      <div className="absolute inset-0">
+        <LabSceneCanvas />
+      </div>
+      {/* Enough shading for glass panels to stay legible over a lit room. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(130%_100%_at_40%_10%,rgba(6,11,20,0.18),rgba(6,11,20,0.78))]"
+      />
+
+      {/* Top bar. */}
+      <header className="absolute inset-x-0 top-0 z-30 flex items-center justify-between gap-3 px-3 py-3 sm:px-5">
+        <div className="glass flex items-center gap-3 rounded-full px-4 py-2">
+          <span className="whitespace-nowrap text-sm font-semibold tracking-tight text-slate-100">
+            EZI ChemLab
+          </span>
+          <span className="hidden text-[11px] uppercase tracking-[0.22em] text-slate-400 sm:inline">
             WebMCP Challenge
-          </p>
-          <div className="flex items-center gap-2">
-            <LanguageToggle />
-            <WebMcpStatusBadge />
-          </div>
+          </span>
         </div>
-        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-          EZI ChemLab
-        </h1>
-        <p className="max-w-xl text-lg leading-relaxed text-slate-300">
-          {t(uiLang, "tagline")}
-        </p>
+
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <LanguageToggle />
+          <ModeToggle />
+          <WebMcpStatusBadge />
+        </div>
       </header>
 
-      <SafetyAlertBanner />
+      {/* Left rail. */}
+      <div className="pointer-events-none absolute left-3 top-1/2 z-30 -translate-y-1/2 sm:left-5">
+        <IconRail />
+      </div>
 
-      <LabSceneCanvas />
-
-      <ObservationPanel />
-
-      <StarterPromptButton />
-
-      <section className="glass-panel p-6">
-        <h2 className="text-sm font-medium tracking-wide text-slate-200">
-          {t(uiLang, "toolsTitle")}
-        </h2>
-        <p className="mt-1.5 text-sm text-slate-400">{t(uiLang, "toolsHint")}</p>
-        <div className="mt-5">
-          <ToolList />
+      {/* Safety alerts sit under the top bar, over the scene. */}
+      <div className="pointer-events-none absolute inset-x-0 top-20 z-30 flex justify-center px-4">
+        <div className="pointer-events-auto w-full max-w-xl">
+          <SafetyAlertBanner />
         </div>
-      </section>
+      </div>
 
-      <ManualToolRunner />
+      {/* On a narrow screen the right panel slides in from a button, rather
+          than taking the room away from the experiment. */}
+      <button
+        type="button"
+        onClick={() => setPanelOpen((open) => !open)}
+        className="glass absolute bottom-4 right-4 z-40 rounded-full px-4 py-2 text-xs text-slate-100 lg:hidden"
+      >
+        {panelOpen ? t(uiLang, "close") : t(uiLang, "labState")}
+      </button>
 
-      <section className="glass-panel p-6">
-        <h2 className="text-sm font-medium tracking-wide text-slate-200">
-          {t(uiLang, "buildTitle")}
-        </h2>
-        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-[auto,1fr] sm:gap-x-6">
-          <dt className="text-slate-400">Frontend</dt>
-          <dd className="text-slate-200">
-            Next.js 14 App Router, React 18, TypeScript, Tailwind
-          </dd>
-          <dt className="text-slate-400">{t(uiLang, "backendHealth")}</dt>
-          <dd>
+      <aside
+        className={`absolute right-0 top-0 z-30 flex h-full w-full max-w-sm flex-col gap-3 overflow-y-auto p-3 pt-20 transition-transform sm:p-5 sm:pt-20 lg:translate-x-0 ${
+          panelOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
+        }`}
+      >
+        <LabStatePanel />
+        <ObservationPanel />
+        {mode === "manual" ? <ManualToolRunner /> : <StarterPromptButton />}
+
+        <section className="glass-panel p-5">
+          <h2 className="text-sm font-medium tracking-wide text-slate-200">
+            {t(uiLang, "backendHealth")}
+          </h2>
+          <div className="mt-3 text-xs">
             <BackendStatus />
-          </dd>
-        </dl>
-      </section>
+          </div>
+        </section>
+      </aside>
 
       <AgentActivityIndicator />
-    </main>
+    </div>
   );
 }

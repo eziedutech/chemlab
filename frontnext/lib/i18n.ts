@@ -65,6 +65,51 @@ const STRINGS = {
 
   buildTitle: { id: "Status build", en: "Build status" },
   backendHealth: { id: "Health backend", en: "Backend health" },
+
+  modeWebmcp: { id: "WebMCP", en: "WebMCP" },
+  modeManual: { id: "Manual", en: "Manual" },
+  modeHintWebmcp: {
+    id: "Agent yang mengendalikan lab lewat WebMCP.",
+    en: "The agent drives the lab through WebMCP.",
+  },
+  modeHintManual: {
+    id: "Jalankan tool sendiri dari panel kanan, tanpa agent.",
+    en: "Run the tools yourself from the right panel, without an agent.",
+  },
+
+  navInfo: { id: "Tentang aplikasi", en: "About this lab" },
+  navCommands: { id: "Perintah yang didukung", en: "Supported commands" },
+  navTools: { id: "Tool terdaftar", en: "Registered tools" },
+  navTopics: { id: "Topik dan bahan", en: "Topics and substances" },
+  navCredits: { id: "Kredit dan lisensi", en: "Credits and licence" },
+  close: { id: "Tutup", en: "Close" },
+
+  aboutBody: {
+    id: "Simulator lab kimia dan fisika 3D untuk siswa SMP dan SMA. AI agent berperan sebagai instruktur: dia mengganti topik, menakar bahan, mencampurnya, menjelaskan tahap reaksi, dan menyusun laporan pengamatan. Semua hasil reaksi berasal dari tabel statis, bukan dari model bahasa, supaya sainsnya tidak berhalusinasi.",
+    en: "A 3D chemistry and physics lab for secondary school students. An AI agent acts as the instructor: it switches topics, measures reagents, mixes them, explains each step of the reaction, and writes the observation report. Reaction outcomes come from a static table rather than a language model, so the science cannot be hallucinated.",
+  },
+  aboutJudges: {
+    id: "Untuk juri: buka halaman ini di in-app browser ChatGPT, atau Chrome 149+ dengan chrome://flags/#enable-webmcp-testing. Tanpa dukungan WebMCP, pindah ke mode Manual dan jalankan tool langsung dari panel kanan.",
+    en: "For judges: open this page in the ChatGPT in-app browser, or Chrome 149+ with chrome://flags/#enable-webmcp-testing. Without WebMCP support, switch to Manual mode and run the tools straight from the right panel.",
+  },
+  commandsBody: {
+    id: "Kalimat berikut cukup untuk menjalankan seluruh demo. Ucapkan ke agent dengan bahasa bebas, tidak harus persis.",
+    en: "These are enough to run the whole demo. Say them to the agent in your own words, they do not have to match exactly.",
+  },
+  topicsBody: {
+    id: "Tiga topik yang dikunci, beserta bahan yang tersedia di masing-masing.",
+    en: "Three locked topics, with the substances available in each.",
+  },
+  creditsBody: {
+    id: "Seluruh model 3D di halaman ini dibuat dari primitif geometris di dalam kode. Tidak ada aset pihak ketiga. Dirilis di bawah lisensi MIT.",
+    en: "Every 3D model on this page is built from geometric primitives in code. There are no third party assets. Released under the MIT licence.",
+  },
+  labState: { id: "Keadaan lab", en: "Lab state" },
+  topic: { id: "Topik", en: "Topic" },
+  lamp: { id: "Lampu uji", en: "Test lamp" },
+  objectState: { id: "Benda", en: "Object" },
+  activity: { id: "Aktivitas agent", en: "Agent activity" },
+  noActivity: { id: "Belum ada tool yang dipanggil.", en: "No tool has been called yet." },
 } as const;
 
 export type StringKey = keyof typeof STRINGS;
@@ -86,15 +131,16 @@ export function t(
 /**
  * Language to start in.
  *
- * Indonesian unless the URL asks for English, which is what the testing
- * instructions hand to the judges.
+ * English by default, since the judges read English and the submission
+ * materials are in English. `?lang=id` opens it in Indonesian, which is what a
+ * classroom link would use.
  */
 export function initialLang(): UiLang {
-  if (typeof window === "undefined") return "id";
+  if (typeof window === "undefined") return "en";
   const requested = new URLSearchParams(window.location.search)
     .get("lang")
     ?.toLowerCase();
-  return requested === "en" ? "en" : "id";
+  return requested === "id" ? "id" : "en";
 }
 
 /** The prompt a judge can paste into the agent to drive the whole demo. */

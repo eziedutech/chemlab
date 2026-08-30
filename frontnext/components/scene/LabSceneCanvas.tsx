@@ -24,7 +24,7 @@ const LabScene = dynamic(
 
 export function LabSceneCanvas() {
   return (
-    <div className="glass-panel h-[clamp(20rem,52vh,32rem)] w-full overflow-hidden">
+    <div className="h-full w-full">
       <LabScene />
     </div>
   );

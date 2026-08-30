@@ -17,26 +17,23 @@ function sourceLabel(lang: UiLang, source: string): string {
 }
 
 /**
- * Where step explanations and the finished lab report are shown.
- *
- * The observation log sits underneath, so what the agent says and what the lab
- * actually recorded can be compared side by side.
+ * Where step explanations and the finished lab report are shown, with the log
+ * the lab itself recorded underneath, so what the agent says and what actually
+ * happened can be compared side by side.
  */
 export function ObservationPanel() {
   const panel = useLabStore((state) => state.panel);
   const observationLog = useLabStore((state) => state.observationLog);
-  const temperature = useLabStore((state) => state.temperatureC);
-  const beaker = useLabStore((state) => state.beaker);
   const uiLang = useLabStore((state) => state.uiLang);
 
   return (
-    <section className="glass-panel p-6">
+    <section className="glass-panel p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-sm font-medium tracking-wide text-slate-200">
           {t(uiLang, "panelTitle")}
         </h2>
         {panel && (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-slate-400">
             {sourceLabel(uiLang, panel.source)}
           </span>
         )}
@@ -44,7 +41,7 @@ export function ObservationPanel() {
 
       {panel ? (
         <article className="mt-4">
-          <h3 className="text-base font-medium text-slate-100">
+          <h3 className="text-sm font-medium text-slate-100">
             {panel.stepNumber && panel.totalSteps
               ? `${t(uiLang, "panelStep", {
                   step: panel.stepNumber,
@@ -59,7 +56,7 @@ export function ObservationPanel() {
             <ul className="mt-4 space-y-1.5 border-t border-white/[0.07] pt-4 text-sm text-slate-400">
               {panel.points.map((point) => (
                 <li key={point} className="flex gap-2">
-                  <span className="text-slate-600">-</span>
+                  <span className="text-slate-500">-</span>
                   <span>{point}</span>
                 </li>
               ))}
@@ -67,47 +64,25 @@ export function ObservationPanel() {
           )}
         </article>
       ) : (
-        <p className="mt-3 text-sm text-slate-400">
+        <p className="mt-3 text-sm leading-relaxed text-slate-400">
           {t(uiLang, "panelEmpty")}
         </p>
       )}
 
-      <dl className="mt-6 grid grid-cols-2 gap-3 border-t border-white/[0.07] pt-4 text-sm sm:grid-cols-4">
-        <div>
-          <dt className="text-xs text-slate-500">{t(uiLang, "volume")}</dt>
-          <dd className="font-mono text-slate-200">
-            {Math.round(beaker.volumeMl)} mL
-          </dd>
-        </div>
-        <div>
-          <dt className="text-xs text-slate-500">{t(uiLang, "temperature")}</dt>
-          <dd className="font-mono text-slate-200">{temperature} C</dd>
-        </div>
-        <div>
-          <dt className="text-xs text-slate-500">{t(uiLang, "inBeaker")}</dt>
-          <dd className="text-slate-200">
-            {beaker.substances.length > 0
-              ? beaker.substances.join(", ")
-              : t(uiLang, "beakerEmpty")}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-xs text-slate-500">{t(uiLang, "observations")}</dt>
-          <dd className="font-mono text-slate-200">{observationLog.length}</dd>
-        </div>
-      </dl>
-
       {observationLog.length > 0 && (
-        <ol className="mt-4 space-y-2 text-sm text-slate-400">
-          {observationLog.map((entry, index) => (
-            <li key={`${index}-${entry.slice(0, 24)}`} className="flex gap-3">
-              <span className="font-mono text-xs text-slate-600">
-                {index + 1}
-              </span>
-              <span>{entry}</span>
-            </li>
-          ))}
-        </ol>
+        <div className="mt-5 border-t border-white/[0.07] pt-4">
+          <h3 className="text-xs uppercase tracking-wider text-slate-400">
+            {t(uiLang, "observations")}
+          </h3>
+          <ol className="mt-2 space-y-2 text-sm text-slate-400">
+            {observationLog.map((entry, index) => (
+              <li key={`${index}-${entry.slice(0, 24)}`} className="flex gap-3">
+                <span className="font-mono text-xs text-slate-500">{index + 1}</span>
+                <span>{entry}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
       )}
     </section>
   );

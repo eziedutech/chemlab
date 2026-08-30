@@ -150,6 +150,11 @@ interface LabState {
   panel: PanelContent | null;
   /** Language of the interface, and the default for generated text. */
   uiLang: UiLang;
+  /**
+   * Who is expected to drive the lab. WebMCP is the point of the project; the
+   * manual mode exists for browsers that do not expose it yet.
+   */
+  mode: "webmcp" | "manual";
 
   /** Called on the first line of every tool execute, so the toast is proof of a real call. */
   pushAgentActivity: (toolName: string) => void;
@@ -161,6 +166,7 @@ interface LabState {
   setSafetyAlert: (alert: SafetyAlert | null) => void;
   setPanel: (panel: PanelContent | null) => void;
   setUiLang: (lang: UiLang) => void;
+  setMode: (mode: "webmcp" | "manual") => void;
   appendObservation: (entry: string) => void;
   resetExperiment: (keepObservationLog?: boolean) => void;
 
@@ -203,7 +209,8 @@ export const useLabStore = create<LabState>((set) => ({
   mix: null,
   pourQueue: [],
   panel: null,
-  uiLang: "id",
+  uiLang: "en",
+  mode: "webmcp",
 
   pushAgentActivity: (toolName) =>
     set((state) => {
@@ -247,6 +254,8 @@ export const useLabStore = create<LabState>((set) => ({
   setPanel: (panel) => set({ panel }),
 
   setUiLang: (lang) => set({ uiLang: lang }),
+
+  setMode: (mode) => set({ mode }),
 
   appendObservation: (entry) =>
     set((state) => ({ observationLog: [...state.observationLog, entry] })),

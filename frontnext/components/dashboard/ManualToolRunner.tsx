@@ -113,7 +113,7 @@ export function ManualToolRunner() {
       </div>
 
       <label className="mt-3 block">
-        <span className="text-xs text-slate-500">{t(uiLang, "runnerArguments")}</span>
+        <span className="text-xs text-slate-400">{t(uiLang, "runnerArguments")}</span>
         <textarea
           value={args}
           onChange={(event) => setArgs(event.target.value)}
@@ -125,7 +125,7 @@ export function ManualToolRunner() {
 
       {result && (
         <div className="mt-4">
-          <span className="text-xs text-slate-500">{t(uiLang, "runnerResult")}</span>
+          <span className="text-xs text-slate-400">{t(uiLang, "runnerResult")}</span>
           <pre className="mt-1 max-h-64 overflow-auto rounded-lg border border-white/10 bg-slate-950/60 p-3 font-mono text-xs leading-relaxed text-slate-300">
             {result}
           </pre>

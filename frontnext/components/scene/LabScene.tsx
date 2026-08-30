@@ -2,6 +2,13 @@
 
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, OrbitControls } from "@react-three/drei";
+import { COUNTER_HEIGHT, LabRoom } from "./LabRoom";
+
+/**
+ * How much the room is enlarged. A real beaker is about 10 cm tall and this one
+ * is 0.92 units, so a metre of room is a little over nine units of scene.
+ */
+const ROOM_SCALE = 9.2;
 import { TopicScene } from "./TopicScene";
 
 /**
@@ -15,14 +22,15 @@ import { TopicScene } from "./TopicScene";
 export function LabScene() {
   return (
     <Canvas
-      // Capping the pixel ratio is what keeps a school laptop at a usable frame rate.
-      dpr={[1, 1.75]}
+      // Capping the pixel ratio is what keeps a school laptop at a usable frame
+      // rate, and it matters more now that the canvas fills the window.
+      dpr={[1, 1.5]}
       gl={{ antialias: true, powerPreference: "high-performance" }}
-      camera={{ position: [1.95, 1.55, 3.15], fov: 36 }}
+      camera={{ position: [4.4, 2.7, 6.0], fov: 38 }}
     >
-      <color attach="background" args={["#0b1220"]} />
+      <color attach="background" args={["#141b26"]} />
 
-      <ambientLight intensity={0.35} />
+      <ambientLight intensity={0.5} />
       <directionalLight position={[3, 5, 2]} intensity={1.5} color="#eaf4ff" />
       <directionalLight position={[-3, 2, -2]} intensity={0.5} color="#8fb6d9" />
 
@@ -46,13 +54,13 @@ export function LabScene() {
         />
       </Environment>
 
-      {/* Bench top. A slab that runs past the frame, so it reads as a work
-          surface rather than a disc floating under the glass. The lab table
-          model replaces it later. */}
-      <mesh position={[0, -0.06, 0]}>
-        <boxGeometry args={[14, 0.12, 14]} />
-        <meshStandardMaterial color="#152135" roughness={0.92} metalness={0.04} />
-      </mesh>
+      {/* The room, drawn in metres and scaled up until the beaker reads as the
+          250 ml piece of glassware it is. The scale puts the bench top exactly
+          at the origin, so everything standing on it keeps the coordinates it
+          always had. */}
+      <group position={[0, -COUNTER_HEIGHT * ROOM_SCALE, 0]} scale={ROOM_SCALE}>
+        <LabRoom />
+      </group>
 
       <TopicScene />
 
@@ -62,7 +70,7 @@ export function LabScene() {
         scale={5}
         blur={2.4}
         far={1.6}
-        resolution={512}
+        resolution={256}
         color="#03070f"
       />
 
@@ -71,9 +79,9 @@ export function LabScene() {
         enablePan={false}
         enableDamping
         dampingFactor={0.08}
-        target={[-0.2, 0.58, 0]}
-        minDistance={2}
-        maxDistance={6}
+        target={[-0.5, 0.5, 0]}
+        minDistance={4}
+        maxDistance={26}
         // Stop the camera from dropping below the bench.
         maxPolarAngle={Math.PI / 2 - 0.06}
         minPolarAngle={0.25}
