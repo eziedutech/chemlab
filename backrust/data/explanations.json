@@ -1,0 +1,104 @@
+{
+  "_note": "Written ahead of time and checked against the school syllabus, then shipped inside the binary. explain_reaction_step never calls a language model at runtime: the content is fixed, the answer is instant, and no credit is spent while the judges are testing.",
+  "topics": {
+    "asam_basa": {
+      "total_steps": 4,
+      "steps": [
+        {
+          "title_id": "Apa yang ada di dalam gelas",
+          "title_en": "What is in the beaker",
+          "id": "Cuka adalah larutan asam asetat (CH3COOH), sebuah asam lemah. Baking soda adalah natrium bikarbonat (NaHCO3), garam yang bersifat basa di dalam air. Selama keduanya masih terpisah, tidak ada yang terjadi.",
+          "en": "Vinegar is a solution of acetic acid (CH3COOH), a weak acid. Baking soda is sodium bicarbonate (NaHCO3), a salt that behaves as a base in water. Nothing happens while the two are kept apart.",
+          "diagram": "beaker holding vinegar beside a spatula of baking soda"
+        },
+        {
+          "title_id": "Asam menyerahkan ion H+",
+          "title_en": "The acid hands over an H+ ion",
+          "id": "Begitu bercampur, asam asetat menyerahkan satu ion H+ kepada ion bikarbonat (HCO3-). Hasil sesaatnya adalah asam karbonat (H2CO3) dan ion natrium asetat yang larut dalam air.",
+          "en": "As soon as they mix, the acetic acid hands an H+ ion to the bicarbonate ion (HCO3-). The immediate products are carbonic acid (H2CO3) and dissolved sodium acetate.",
+          "diagram": "arrow showing H+ moving from CH3COOH to HCO3-"
+        },
+        {
+          "title_id": "Asam karbonat terurai menjadi gas",
+          "title_en": "Carbonic acid breaks down into gas",
+          "id": "Asam karbonat tidak stabil dan langsung terurai menjadi air dan gas karbon dioksida (H2CO3 menjadi H2O + CO2). Gas itulah yang naik sebagai gelembung dan membuat larutan berbuih.",
+          "en": "Carbonic acid is unstable and breaks apart at once into water and carbon dioxide gas (H2CO3 becomes H2O + CO2). That gas is what rises as bubbles and makes the solution fizz.",
+          "diagram": "bubbles rising from the liquid to the surface"
+        },
+        {
+          "title_id": "Bukti yang bisa diamati",
+          "title_en": "The evidence you can observe",
+          "id": "Ada tiga bukti reaksi: gelembung gas, larutan yang menjadi lebih dingin karena reaksi ini endoterm (menyerap kalor dari sekitarnya), dan perubahan warna indikator karena keasaman larutan berubah. Sisa larutannya adalah natrium asetat dalam air.",
+          "en": "Three pieces of evidence show a reaction happened: gas bubbles, a solution that turns colder because the reaction is endothermic (it absorbs heat from its surroundings), and an indicator that changes colour because the acidity has changed. What remains in the beaker is sodium acetate dissolved in water.",
+          "diagram": "thermometer reading lower and a litmus strip changing colour"
+        }
+      ]
+    },
+    "elektrolit": {
+      "total_steps": 4,
+      "steps": [
+        {
+          "title_id": "Rangkaian uji daya hantar",
+          "title_en": "The conductivity test circuit",
+          "id": "Dua elektroda dicelupkan ke dalam larutan dan dihubungkan ke lampu melalui sumber listrik. Lampu hanya menyala kalau larutan mampu menutup rangkaian, artinya larutan itu menghantarkan listrik.",
+          "en": "Two electrodes are dipped into the solution and wired to a lamp through a power source. The lamp only lights if the solution can complete the circuit, which means the solution conducts electricity.",
+          "diagram": "two electrodes in a beaker wired to a lamp"
+        },
+        {
+          "title_id": "Yang menghantarkan adalah ion, bukan airnya",
+          "title_en": "Ions do the conducting, not the water",
+          "id": "Air murni hampir tidak menghantarkan listrik. Yang menentukan adalah zat yang dilarutkan: kalau zat itu menghasilkan ion yang bebas bergerak, muatan bisa berpindah dari satu elektroda ke elektroda lain.",
+          "en": "Pure water barely conducts at all. What matters is the substance dissolved in it: if that substance produces ions that can move freely, charge can travel from one electrode to the other.",
+          "diagram": "ions drifting towards the two electrodes"
+        },
+        {
+          "title_id": "Membandingkan tiga larutan",
+          "title_en": "Comparing three solutions",
+          "id": "Garam dapur adalah senyawa ion; di dalam air ia terurai sempurna menjadi Na+ dan Cl-, sehingga lampu menyala terang (elektrolit kuat). Gula larut sebagai molekul utuh tanpa menghasilkan ion, sehingga lampu mati (non-elektrolit). Cuka hanya terionisasi sebagian, ionnya sedikit, sehingga lampu menyala redup (elektrolit lemah).",
+          "en": "Table salt is an ionic compound: in water it separates completely into Na+ and Cl-, so the lamp glows brightly (a strong electrolyte). Sugar dissolves as whole molecules and produces no ions, so the lamp stays dark (a non electrolyte). Vinegar ionises only partially, giving few ions, so the lamp glows dimly (a weak electrolyte).",
+          "diagram": "three beakers with a bright, a dim, and an unlit lamp"
+        },
+        {
+          "title_id": "Kesimpulan yang bisa ditarik",
+          "title_en": "The conclusion to draw",
+          "id": "Terang redupnya lampu mengukur banyaknya ion bebas dalam larutan, bukan banyaknya zat yang dilarutkan. Karena itu satu sendok garam bisa menghantarkan jauh lebih baik daripada satu sendok gula pada jumlah yang sama.",
+          "en": "How brightly the lamp burns measures how many free ions the solution holds, not how much substance was dissolved. That is why a spoonful of salt conducts far better than the same spoonful of sugar.",
+          "diagram": "scale from non electrolyte to weak to strong"
+        }
+      ]
+    },
+    "massa_jenis": {
+      "total_steps": 4,
+      "steps": [
+        {
+          "title_id": "Massa jenis: massa dibagi volume",
+          "title_en": "Density: mass divided by volume",
+          "id": "Massa jenis adalah massa tiap satuan volume. Air tawar sekitar 1,00 g/cm3, sedangkan telur ayam segar sedikit lebih rapat, sekitar 1,03 g/cm3.",
+          "en": "Density is mass per unit of volume. Fresh water is about 1.00 g/cm3, while a fresh chicken egg is slightly denser, around 1.03 g/cm3.",
+          "diagram": "egg beside a labelled beaker of water"
+        },
+        {
+          "title_id": "Gaya apung menurut Archimedes",
+          "title_en": "Buoyancy, following Archimedes",
+          "id": "Benda yang dicelupkan ke zat cair mendapat gaya apung ke atas sebesar berat zat cair yang dipindahkannya. Benda mengapung kalau gaya apung itu mampu mengimbangi beratnya sendiri.",
+          "en": "An object placed in a liquid feels an upward buoyant force equal to the weight of the liquid it pushes aside. It floats when that force can balance its own weight.",
+          "diagram": "arrows for weight down and buoyant force up"
+        },
+        {
+          "title_id": "Telur di air tawar",
+          "title_en": "The egg in fresh water",
+          "id": "Karena telur lebih rapat daripada air tawar, berat air yang dipindahkan lebih kecil daripada berat telur. Gaya apungnya kalah, dan telur turun ke dasar gelas.",
+          "en": "Because the egg is denser than fresh water, the water it pushes aside weighs less than the egg does. Buoyancy loses, and the egg settles on the bottom of the beaker.",
+          "diagram": "egg resting on the base of the beaker"
+        },
+        {
+          "title_id": "Menambahkan garam mengubah hasilnya",
+          "title_en": "Adding salt changes the outcome",
+          "id": "Garam yang larut menambah massa tanpa menambah volume secara berarti, sehingga massa jenis larutan naik melewati massa jenis telur. Kini air yang dipindahkan lebih berat daripada telur, gaya apung menang, dan telur mengapung. Zatnya sama, yang berubah hanyalah massa jenis cairannya.",
+          "en": "Dissolved salt adds mass without adding much volume, so the density of the solution rises past the density of the egg. Now the displaced water weighs more than the egg, buoyancy wins, and the egg floats. The egg has not changed at all: only the density of the liquid has.",
+          "diagram": "egg floating in salt water beside the same egg sunk in fresh water"
+        }
+      ]
+    }
+  }
+}

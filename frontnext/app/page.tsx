@@ -1,4 +1,5 @@
 import { AgentActivityIndicator } from "../components/AgentActivityIndicator";
+import { ObservationPanel } from "../components/dashboard/ObservationPanel";
 import { ToolList } from "../components/dashboard/ToolList";
 import { WebMcpStatusBadge } from "../components/dashboard/WebMcpStatusBadge";
 import { LabSceneCanvas } from "../components/scene/LabSceneCanvas";
@@ -29,6 +30,8 @@ export default function Home() {
       </header>
 
       <LabSceneCanvas />
+
+      <ObservationPanel />
 
       <section className="glass-panel p-6">
         <h2 className="text-sm font-medium tracking-wide text-slate-200">

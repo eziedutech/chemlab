@@ -1,8 +1,18 @@
+mod cache;
+mod explanations;
+mod fallback;
+mod llm_client;
+mod models;
+mod rate_limit;
 mod routes;
+mod state;
 
 use std::net::SocketAddr;
 
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 
@@ -15,10 +25,21 @@ async fn main() {
         )
         .init();
 
+    let state = state::AppState::new();
+
     let app = Router::new()
         .route("/health", get(routes::health::health))
+        .route(
+            "/api/generate-explanation",
+            post(routes::generate_explanation::generate_explanation),
+        )
+        .route(
+            "/api/generate-lab-report",
+            post(routes::generate_lab_report::generate_lab_report),
+        )
         .layer(cors_layer())
-        .layer(TraceLayer::new_for_http());
+        .layer(TraceLayer::new_for_http())
+        .with_state(state);
 
     let port: u16 = std::env::var("PORT")
         .ok()
@@ -31,9 +52,14 @@ async fn main() {
         .expect("failed to bind the listen address");
     tracing::info!("backrust listening on {addr}");
 
-    axum::serve(listener, app)
-        .await
-        .expect("server stopped unexpectedly");
+    // Connection info is needed so the paid endpoint can be rate limited per
+    // client when no proxy header is present.
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
+    .expect("server stopped unexpectedly");
 }
 
 /// CORS policy.

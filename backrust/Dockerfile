@@ -12,6 +12,7 @@ COPY Cargo.toml Cargo.lock ./
 RUN mkdir src && echo "fn main() {}" > src/main.rs \
     && cargo build --release \
     && rm -rf src
+COPY data ./data
 COPY src ./src
 # Touch the real entrypoint so cargo does not reuse the dummy build artifact.
 RUN touch src/main.rs && cargo build --release

@@ -87,6 +87,21 @@ export interface MixBatch {
   startedAt: number;
 }
 
+/**
+ * What the observation panel is showing: a step explanation or a finished lab
+ * report. The source is kept so the panel can say plainly where the text came
+ * from, prepared in advance or written by the model just now.
+ */
+export interface PanelContent {
+  kind: "explanation" | "report";
+  title: string;
+  body: string;
+  points: string[];
+  source: string;
+  stepNumber?: number;
+  totalSteps?: number;
+}
+
 export const EMPTY_BEAKER: BeakerState = {
   substances: [],
   color: "#dfe8ff",
@@ -124,6 +139,7 @@ interface LabState {
   /** The mix currently being carried out, or the last one that finished. */
   mix: MixBatch | null;
   pourQueue: PourJob[];
+  panel: PanelContent | null;
 
   /** Called on the first line of every tool execute, so the toast is proof of a real call. */
   pushAgentActivity: (toolName: string) => void;
@@ -131,6 +147,7 @@ interface LabState {
   setWebmcpStatus: (status: WebMcpStatus) => void;
   setActiveExperiment: (subject: Subject, topic: Topic) => void;
   setSafetyAlert: (alert: SafetyAlert | null) => void;
+  setPanel: (panel: PanelContent | null) => void;
   appendObservation: (entry: string) => void;
   resetExperiment: (keepObservationLog?: boolean) => void;
 
@@ -166,6 +183,7 @@ export const useLabStore = create<LabState>((set) => ({
   objectState: null,
   mix: null,
   pourQueue: [],
+  panel: null,
 
   pushAgentActivity: (toolName) =>
     set((state) => ({
@@ -193,9 +211,12 @@ export const useLabStore = create<LabState>((set) => ({
       objectState: null,
       mix: null,
       pourQueue: [],
+      panel: null,
     }),
 
   setSafetyAlert: (alert) => set({ safetyAlert: alert }),
+
+  setPanel: (panel) => set({ panel }),
 
   appendObservation: (entry) =>
     set((state) => ({ observationLog: [...state.observationLog, entry] })),
@@ -209,6 +230,7 @@ export const useLabStore = create<LabState>((set) => ({
       objectState: null,
       mix: null,
       pourQueue: [],
+      panel: null,
       observationLog: keepObservationLog ? state.observationLog : [],
     })),
 
