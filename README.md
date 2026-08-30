@@ -217,10 +217,15 @@ locally. They differ in one thing that matters on a shared machine: the
 production file publishes no host ports, and lets the reverse proxy reach each
 container over the shared network instead.
 
-Pushing to `main` redeploys, through the webhook Dokploy issues for the
-service. Point it at this repository, set the branch to `main` and the compose
-file to `docker-compose.prod.yml`, then add the webhook to the repository under
-Settings, Webhooks, with the content type set to `application/json`.
+Pushing to `main` redeploys. In the Compose service, set the provider to this
+repository with branch `main`, compose path `./docker-compose.prod.yml`, and
+trigger type `On Push`, then turn Autodeploy on. With the GitHub app connected
+the webhook is created for you, so nothing has to be added to the repository by
+hand.
+
+One thing to remember on later deploys: changing `NEXT_PUBLIC_API_BASE_URL`
+needs a Rebuild rather than a Restart, since the value is compiled into the
+bundle.
 
 ## Configuration
 
