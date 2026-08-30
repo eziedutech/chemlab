@@ -19,6 +19,12 @@ export interface AgentActivity {
   id: number;
   toolName: string;
   at: number;
+  /**
+   * Who made the call. The toast is the visible proof that a tool call really
+   * happened, so a call made by hand from the page must not be dressed up as
+   * one made by an agent.
+   */
+  origin: "agent" | "manual";
 }
 
 export interface SafetyAlert {
@@ -147,6 +153,8 @@ interface LabState {
 
   /** Called on the first line of every tool execute, so the toast is proof of a real call. */
   pushAgentActivity: (toolName: string) => void;
+  /** Marks the next tool call as one a person started from the page. */
+  markNextCallManual: () => void;
   dropAgentActivity: (id: number) => void;
   setWebmcpStatus: (status: WebMcpStatus) => void;
   setActiveExperiment: (subject: Subject, topic: Topic) => void;
@@ -172,6 +180,12 @@ interface LabState {
 }
 
 let activityCounter = 0;
+/**
+ * Set just before a call started from the page, and consumed by the next
+ * pushAgentActivity. It lives outside the store because it is read during the
+ * same tick it is written, before any render happens.
+ */
+let nextCallOrigin: "agent" | "manual" = "agent";
 let pourCounter = 0;
 let batchCounter = 0;
 
@@ -192,12 +206,20 @@ export const useLabStore = create<LabState>((set) => ({
   uiLang: "id",
 
   pushAgentActivity: (toolName) =>
-    set((state) => ({
-      agentActivity: [
-        ...state.agentActivity,
-        { id: ++activityCounter, toolName, at: Date.now() },
-      ].slice(-4),
-    })),
+    set((state) => {
+      const origin = nextCallOrigin;
+      nextCallOrigin = "agent";
+      return {
+        agentActivity: [
+          ...state.agentActivity,
+          { id: ++activityCounter, toolName, at: Date.now(), origin },
+        ].slice(-4),
+      };
+    }),
+
+  markNextCallManual: () => {
+    nextCallOrigin = "manual";
+  },
 
   dropAgentActivity: (id) =>
     set((state) => ({

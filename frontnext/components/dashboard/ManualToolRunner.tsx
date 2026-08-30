@@ -62,6 +62,8 @@ export function ManualToolRunner() {
 
     setRunning(true);
     try {
+      // Label the toast honestly: this call came from the page, not an agent.
+      useLabStore.getState().markNextCallManual();
       const value = await tool.execute(parsed);
       setResult(JSON.stringify(value, null, 2));
     } catch (error) {

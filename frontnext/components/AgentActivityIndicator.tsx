@@ -43,7 +43,8 @@ export function AgentActivityIndicator() {
           key={activity.id}
           className="glass rounded-lg border-lab-accent/30 bg-slate-950/70 px-5 py-4 text-lg font-medium text-slate-300 sm:text-xl"
         >
-          <span aria-hidden="true">&#128295;</span> agent called:{" "}
+          <span aria-hidden="true">&#128295;</span>{" "}
+          {activity.origin === "manual" ? "run by hand:" : "agent called:"}{" "}
           <span className="font-mono text-white">{activity.toolName}</span>
         </div>
       ))}
