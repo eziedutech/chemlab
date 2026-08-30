@@ -2,7 +2,7 @@
 name = "backrust"
 version = "0.1.0"
 edition = "2021"
-description = "EZI Lab backend: health endpoint and LLM proxy for narrative lab text"
+description = "EZI ChemLab backend: health endpoint and LLM proxy for narrative lab text"
 license = "MIT"
 
 [dependencies]

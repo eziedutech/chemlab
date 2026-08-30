@@ -2,7 +2,7 @@ services:
   backrust:
     build:
       context: ./backrust
-    container_name: ezilab-backrust
+    container_name: ezichemlab-backrust
     environment:
       PORT: 8080
       # Provider agnostic LLM settings, see .env.example.
@@ -29,7 +29,7 @@ services:
       args:
         # NEXT_PUBLIC_ values are inlined at build time, not read at runtime.
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8080}
-    container_name: ezilab-frontnext
+    container_name: ezichemlab-frontnext
     environment:
       PORT: 3000
     ports:

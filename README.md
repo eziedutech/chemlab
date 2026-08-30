@@ -1,4 +1,4 @@
-# EZI Lab
+# EZI ChemLab
 
 > A 3D science lab where an AI agent is the lab instructor, powered by WebMCP.
 
@@ -27,7 +27,7 @@ cost money, glassware breaks, and a teacher cannot supervise thirty students
 pouring acid at the same time. The practical work that makes science click is
 often the first thing that gets cut.
 
-EZI Lab is a browser based 3D lab for those students. It covers three locked
+EZI ChemLab is a browser based 3D lab for those students. It covers three locked
 topics from the Indonesian secondary curriculum: acid and base reactions,
 electrolyte versus non electrolyte solutions, and density with Archimedes'
 principle. What makes it different from a video or a slideshow is that an AI
@@ -38,7 +38,12 @@ student talks to the agent, and the simulation responds.
 
 ## For judges: how to test
 
-No account and no login are required, and the app is free to use.
+Live URL: **https://chemlab.eziedutech.dev/?lang=en**
+
+No account and no login are required, and the app is free to use. The `lang=en`
+parameter opens the interface in English; without it the page opens in
+Indonesian, which is the classroom default, and the toggle in the header
+switches at any time.
 
 1. Open the live URL in the ChatGPT desktop app in-app browser, which supports
    WebMCP by default. As an alternative, use Chrome 149 or newer with
@@ -46,11 +51,15 @@ No account and no login are required, and the app is free to use.
 2. Confirm the WebMCP status badge in the app reads as detected, with a tool
    count of seven.
 3. Ask the agent to list its available tools, then paste the starter prompt from
-   the app's "Copy starter prompt" button.
-4. Watch the 3D scene: every agent tool call raises a visible toast that names
-   the tool that was called.
+   the app's "Copy starter prompt" button. The prompt is also printed on the
+   page, so it can be selected by hand if the clipboard is blocked.
+4. Watch the 3D scene: every agent tool call raises a visible toast naming the
+   tool that ran. A call started from the manual runner instead of an agent
+   says "run by hand", so the two are never confused.
 
-Live URL and the starter prompt text are added here once the deployment is live.
+If the browser has no WebMCP support at all, the page still works: the badge
+says so, and the manual tool runner near the bottom executes the same tool
+descriptors, with the same structured results.
 
 ## WebMCP tools
 
@@ -168,14 +177,35 @@ cd frontnext && npm install && npm run dev
 The project is deployed with Dokploy on a self hosted VPS, with HTTPS issued by
 Let's Encrypt.
 
-1. Create two Docker Compose services from this repository, `frontnext` and
-   `backrust`.
-2. Set the environment variables from the table below. `LLM_API_KEY` belongs to
-   the backend service only and is never exposed to the browser.
-3. Point the backend healthcheck at `GET /health`.
-4. Set `ALLOWED_ORIGINS` on the backend to the production frontend origin, so
-   CORS is restricted rather than wildcarded.
-5. Rebuild the frontend whenever `NEXT_PUBLIC_API_BASE_URL` changes, because
+Two services, on two hostnames:
+
+| Service | Hostname |
+|---|---|
+| `frontnext` | `chemlab.eziedutech.dev` |
+| `backrust` | `api.chemlab.eziedutech.dev` |
+
+1. Point both hostnames at the VPS with an A record before deploying, so
+   Let's Encrypt can issue for each of them.
+2. Create the two services from this repository and set their environment:
+
+   ```
+   # backrust
+   LLM_BASE_URL=https://api.openai.com/v1
+   LLM_MODEL=gpt-4o-mini
+   LLM_API_KEY=<provider key>
+   ALLOWED_ORIGINS=https://chemlab.eziedutech.dev
+
+   # frontnext, a build argument rather than a runtime variable
+   NEXT_PUBLIC_API_BASE_URL=https://api.chemlab.eziedutech.dev
+   ```
+
+3. `LLM_API_KEY` belongs to the backend only and is never exposed to the
+   browser.
+4. Point the backend healthcheck at `GET /health`.
+5. Keep `ALLOWED_ORIGINS` set to the frontend origin, so CORS is restricted
+   rather than wildcarded. Leaving it empty falls back to permissive, which is
+   for local development only.
+6. Rebuild the frontend whenever `NEXT_PUBLIC_API_BASE_URL` changes, because
    `NEXT_PUBLIC_` values are inlined at build time and not read at runtime.
 
 ## Configuration

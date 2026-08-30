@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "EZI Lab",
+  title: "EZI ChemLab",
   description:
     "A 3D chemistry and physics lab where an AI agent acts as the lab instructor, powered by WebMCP.",
 };

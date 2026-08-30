@@ -37,7 +37,7 @@ export function PageShell({ apiBaseUrl }: { apiBaseUrl: string }) {
           </div>
         </div>
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-          EZI Lab
+          EZI ChemLab
         </h1>
         <p className="max-w-xl text-lg leading-relaxed text-slate-300">
           {t(uiLang, "tagline")}
