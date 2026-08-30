@@ -182,10 +182,14 @@ Two services, on two hostnames:
 | Service | Hostname |
 |---|---|
 | `frontnext` | `chemlab.eziedutech.dev` |
-| `backrust` | `api.chemlab.eziedutech.dev` |
+| `backrust` | `apichemlab.eziedutech.dev` |
 
-1. Point both hostnames at the VPS with an A record before deploying, so
-   Let's Encrypt can issue for each of them.
+Both are single label subdomains on purpose. The certificate at the Cloudflare
+edge covers `*.eziedutech.dev` and that wildcard is one level deep, so a name
+like `api.chemlab.eziedutech.dev` would not be covered.
+
+1. Point both hostnames at the VPS with an A record before deploying, so a
+   certificate can be issued for each of them.
 2. Create the two services from this repository and set their environment:
 
    ```
@@ -196,7 +200,7 @@ Two services, on two hostnames:
    ALLOWED_ORIGINS=https://chemlab.eziedutech.dev
 
    # frontnext, a build argument rather than a runtime variable
-   NEXT_PUBLIC_API_BASE_URL=https://api.chemlab.eziedutech.dev
+   NEXT_PUBLIC_API_BASE_URL=https://apichemlab.eziedutech.dev
    ```
 
 3. `LLM_API_KEY` belongs to the backend only and is never exposed to the
