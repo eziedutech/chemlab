@@ -1,0 +1,39 @@
+services:
+  backrust:
+    build:
+      context: ./backrust
+    container_name: ezilab-backrust
+    environment:
+      PORT: 8080
+      # Provider agnostic LLM settings, see .env.example.
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      # Comma separated list of allowed origins. Empty means permissive,
+      # which is acceptable for local development only.
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
+      RUST_LOG: ${RUST_LOG:-info}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  frontnext:
+    build:
+      context: ./frontnext
+      args:
+        # NEXT_PUBLIC_ values are inlined at build time, not read at runtime.
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8080}
+    container_name: ezilab-frontnext
+    environment:
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backrust
+    restart: unless-stopped
