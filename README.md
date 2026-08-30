@@ -67,8 +67,43 @@ lands.
 | `get_lab_state` | Reads the current lab state before deciding the next step | Topic, beaker contents, colour, temperature, observation log |
 | `reset_experiment` | Empties the beaker and restarts the current topic | Active topic, cleared flag |
 
-A real `registerTool` snippet is added to this section once the tool layer is
-implemented.
+Registration itself lives in
+[`frontnext/lib/webmcp/registerTools.ts`](frontnext/lib/webmcp/registerTools.ts)
+and runs from a `useEffect` in a client component, never at module load, because
+`document` does not exist during server rendering:
+
+```ts
+export function registerTools(): RegistrationResult {
+  const modelContext = getModelContext();
+
+  if (!modelContext) {
+    return { detected: false, registered: [], unregister: () => {} };
+  }
+
+  for (const tool of toolDescriptors) {
+    modelContext.unregisterTool?.(tool.name);
+    modelContext.registerTool(tool);
+  }
+
+  return {
+    detected: true,
+    registered: [...toolNames],
+    unregister: () => {
+      for (const tool of toolDescriptors) {
+        modelContext.unregisterTool?.(tool.name);
+      }
+    },
+  };
+}
+```
+
+Two details are deliberate. Each tool is unregistered before it is registered, so
+React StrictMode mounting the effect twice cannot produce duplicates. And the
+entry point is resolved through `getModelContext()`, which reads
+`document.modelContext` first and falls back to `navigator.modelContext`, because
+the specification moved between those two locations in July 2026 and browsers in
+the wild expose either one. When neither exists the app keeps running and the
+status badge reports that WebMCP was not detected.
 
 ## Architecture
 
