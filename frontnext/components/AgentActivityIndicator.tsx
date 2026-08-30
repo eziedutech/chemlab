@@ -41,7 +41,7 @@ export function AgentActivityIndicator() {
       {agentActivity.map((activity) => (
         <div
           key={activity.id}
-          className="rounded-xl border border-lab-accent/60 bg-slate-900/95 px-5 py-4 text-lg font-semibold text-lab-accent shadow-2xl shadow-black/50 sm:text-xl"
+          className="glass rounded-lg border-lab-accent/30 bg-slate-950/70 px-5 py-4 text-lg font-medium text-slate-300 sm:text-xl"
         >
           <span aria-hidden="true">&#128295;</span> agent called:{" "}
           <span className="font-mono text-white">{activity.toolName}</span>
