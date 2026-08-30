@@ -46,10 +46,12 @@ export function LabScene() {
         />
       </Environment>
 
-      {/* Bench top. The lab table model replaces this later. */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.001, 0]}>
-        <circleGeometry args={[1.35, 64]} />
-        <meshStandardMaterial color="#131f33" roughness={0.9} metalness={0.05} />
+      {/* Bench top. A slab that runs past the frame, so it reads as a work
+          surface rather than a disc floating under the glass. The lab table
+          model replaces it later. */}
+      <mesh position={[0, -0.06, 0]}>
+        <boxGeometry args={[14, 0.12, 14]} />
+        <meshStandardMaterial color="#152135" roughness={0.92} metalness={0.04} />
       </mesh>
 
       <Beaker />
