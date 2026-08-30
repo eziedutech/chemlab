@@ -3,6 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, OrbitControls } from "@react-three/drei";
 import { Beaker } from "./Beaker";
+import { PouringReagent } from "./PouringReagent";
 
 /**
  * Root of the 3D lab.
@@ -18,7 +19,7 @@ export function LabScene() {
       // Capping the pixel ratio is what keeps a school laptop at a usable frame rate.
       dpr={[1, 1.75]}
       gl={{ antialias: true, powerPreference: "high-performance" }}
-      camera={{ position: [1.5, 1.15, 2.35], fov: 34 }}
+      camera={{ position: [1.85, 1.55, 3.05], fov: 36 }}
     >
       <color attach="background" args={["#0b1220"]} />
 
@@ -55,6 +56,7 @@ export function LabScene() {
       </mesh>
 
       <Beaker />
+      <PouringReagent />
 
       <ContactShadows
         position={[0, 0.001, 0]}
@@ -71,9 +73,9 @@ export function LabScene() {
         enablePan={false}
         enableDamping
         dampingFactor={0.08}
-        target={[0, 0.42, 0]}
-        minDistance={1.6}
-        maxDistance={5}
+        target={[0, 0.62, 0]}
+        minDistance={2}
+        maxDistance={6}
         // Stop the camera from dropping below the bench.
         maxPolarAngle={Math.PI / 2 - 0.06}
         minPolarAngle={0.25}

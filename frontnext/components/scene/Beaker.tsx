@@ -2,21 +2,14 @@
 
 import { useEffect, useMemo } from "react";
 import { CanvasTexture, DoubleSide, SRGBColorSpace } from "three";
-import { useLabStore } from "../../store/labStore";
-
-const OUTER_RADIUS = 0.5;
-const WALL_HEIGHT = 0.92;
-const LIQUID_RADIUS = OUTER_RADIUS - 0.025;
-const BASE_HEIGHT = 0.024;
-/** Volume that fills the beaker to the brim, used to map millilitres to height. */
-const FULL_VOLUME_ML = 250;
-const MAX_LIQUID_HEIGHT = WALL_HEIGHT * 0.82;
-
-/** World height of the liquid surface for a given volume. */
-function surfaceHeight(volumeMl: number): number {
-  const ratio = Math.min(1, Math.max(0, volumeMl / FULL_VOLUME_ML));
-  return BASE_HEIGHT + ratio * MAX_LIQUID_HEIGHT;
-}
+import {
+  BASE_HEIGHT,
+  FULL_VOLUME_ML,
+  OUTER_RADIUS,
+  surfaceHeight,
+  WALL_HEIGHT,
+} from "../../lib/scene/beakerGeometry";
+import { Liquid } from "./Liquid";
 
 /**
  * Volume scale printed on the glass, drawn to a canvas and wrapped around the
@@ -99,13 +92,7 @@ function useGraduationTexture(): CanvasTexture | null {
  * cost a school laptop cannot absorb, and at this scale it buys very little.
  */
 export function Beaker() {
-  const beaker = useLabStore((state) => state.beaker);
   const graduations = useGraduationTexture();
-
-  const liquidHeight = useMemo(
-    () => surfaceHeight(beaker.volumeMl) - BASE_HEIGHT,
-    [beaker.volumeMl],
-  );
 
   return (
     <group>
@@ -164,32 +151,7 @@ export function Beaker() {
         />
       </mesh>
 
-      {/* Liquid, shown only once something has been poured in. */}
-      {liquidHeight > 0.001 && (
-        <group position={[0, BASE_HEIGHT + liquidHeight / 2, 0]}>
-          <mesh>
-            <cylinderGeometry args={[LIQUID_RADIUS, LIQUID_RADIUS, liquidHeight, 48]} />
-            <meshStandardMaterial
-              color={beaker.color}
-              transparent
-              opacity={0.86}
-              roughness={0.25}
-              metalness={0}
-            />
-          </mesh>
-          {/* Slightly brighter disc at the surface, so the meniscus is legible. */}
-          <mesh position={[0, liquidHeight / 2 + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <circleGeometry args={[LIQUID_RADIUS, 48]} />
-            <meshStandardMaterial
-              color={beaker.color}
-              transparent
-              opacity={0.95}
-              roughness={0.12}
-              metalness={0}
-            />
-          </mesh>
-        </group>
-      )}
+      <Liquid />
     </group>
   );
 }

@@ -60,7 +60,7 @@ lands.
 | Tool | What it does | Returns |
 |---|---|---|
 | `switch_experiment_mode` | Switches the active subject and topic, and swaps the 3D scene | Active topic, scene name, available substances, suggested next step |
-| `mix_substances` | Mixes two substances and triggers the visual reaction | Reaction id, visual state, temperature change, observation text |
+| `mix_substances` | Lifts each reagent, pours it into the beaker, and applies the reaction | Reaction id, visual state, temperature change, observation in both languages, animation duration |
 | `explain_reaction_step` | Explains one step of the reaction to the student | Step number, explanation, total steps |
 | `render_lab_report` | Composes the observation report after the experiment | Formatted report, learning points |
 | `trigger_safety_alert` | Shows an educational safety banner | Severity, auto dismiss timing |
