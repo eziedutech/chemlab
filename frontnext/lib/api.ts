@@ -37,7 +37,7 @@ export interface LabReportResponse {
 /** Resolved once per page load, then reused. */
 let baseUrlPromise: Promise<string> | null = null;
 
-async function resolveBaseUrl(): Promise<string> {
+export async function resolveApiBaseUrl(): Promise<string> {
   if (typeof window === "undefined") return BUILD_TIME_BASE_URL;
 
   if (!baseUrlPromise) {
@@ -64,7 +64,7 @@ async function resolveBaseUrl(): Promise<string> {
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T | null> {
-  const baseUrl = await resolveBaseUrl();
+  const baseUrl = await resolveApiBaseUrl();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 

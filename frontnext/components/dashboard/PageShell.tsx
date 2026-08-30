@@ -1,6 +1,7 @@
 "use client";
 
 import { AgentActivityIndicator } from "../AgentActivityIndicator";
+import { BackendStatus } from "./BackendStatus";
 import { LanguageToggle } from "./LanguageToggle";
 import { ManualToolRunner } from "./ManualToolRunner";
 import { ObservationPanel } from "./ObservationPanel";
@@ -19,7 +20,7 @@ import { useLabStore } from "../../store/labStore";
  * A client component because every panel below reads the interface language
  * from the store, and the language is only known once the URL can be read.
  */
-export function PageShell({ apiBaseUrl }: { apiBaseUrl: string }) {
+export function PageShell() {
   const uiLang = useLabStore((state) => state.uiLang);
 
   return (
@@ -74,7 +75,9 @@ export function PageShell({ apiBaseUrl }: { apiBaseUrl: string }) {
             Next.js 14 App Router, React 18, TypeScript, Tailwind
           </dd>
           <dt className="text-slate-400">{t(uiLang, "backendHealth")}</dt>
-          <dd className="font-mono text-slate-200">{apiBaseUrl}/health</dd>
+          <dd>
+            <BackendStatus />
+          </dd>
         </dl>
       </section>
 
