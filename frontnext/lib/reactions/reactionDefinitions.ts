@@ -13,6 +13,11 @@ export type TemperatureDirection = "endoterm" | "eksoterm" | "netral";
 export interface SubstanceDefinition {
   /** Colour the substance shows while it is being poured. */
   color: string;
+  /**
+   * Whether the scene pours this from a bottle or lowers it in as an object.
+   * An egg does not come out of a reagent bottle.
+   */
+  kind: "liquid" | "powder" | "object";
   labelId: string;
   labelEn: string;
   /** Spellings an agent is likely to type for this substance. */
@@ -39,30 +44,35 @@ export interface ReactionDefinition {
 export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   air: {
     color: "#cfe0ee",
+    kind: "liquid",
     labelId: "Air",
     labelEn: "Water",
     aliases: ["water", "air_tawar", "air_keran", "fresh_water", "plain_water"],
   },
   air_suling: {
     color: "#e2eef7",
+    kind: "liquid",
     labelId: "Air suling",
     labelEn: "Distilled water",
     aliases: ["aquades", "akuades", "distilled_water", "aquadest"],
   },
   air_garam: {
     color: "#c3d9ea",
+    kind: "liquid",
     labelId: "Air garam",
     labelEn: "Salt water",
     aliases: ["larutan_garam", "salt_water", "brine", "air_asin"],
   },
   cuka: {
     color: "#f0e4bf",
+    kind: "liquid",
     labelId: "Cuka",
     labelEn: "Vinegar",
     aliases: ["vinegar", "asam_cuka", "cuka_dapur", "asam_asetat", "acetic_acid"],
   },
   baking_soda: {
     color: "#f3f6f9",
+    kind: "powder",
     labelId: "Baking soda",
     labelEn: "Baking soda",
     aliases: [
@@ -75,30 +85,35 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   },
   garam: {
     color: "#f2f5f8",
+    kind: "powder",
     labelId: "Garam",
     labelEn: "Salt",
     aliases: ["salt", "nacl", "garam_dapur", "table_salt"],
   },
   gula: {
     color: "#f6f1e4",
+    kind: "powder",
     labelId: "Gula",
     labelEn: "Sugar",
     aliases: ["sugar", "sukrosa", "sucrose", "gula_pasir"],
   },
   lakmus: {
     color: "#b9a7d8",
+    kind: "powder",
     labelId: "Lakmus",
     labelEn: "Litmus",
     aliases: ["litmus", "kertas_lakmus", "litmus_paper", "indikator_lakmus"],
   },
   pp: {
     color: "#f4f0f7",
+    kind: "liquid",
     labelId: "Indikator PP",
     labelEn: "Phenolphthalein",
     aliases: ["fenolftalein", "phenolphthalein", "indikator_pp", "pp_indicator"],
   },
   telur: {
     color: "#f0e2cc",
+    kind: "object",
     labelId: "Telur",
     labelEn: "Egg",
     aliases: ["egg", "telur_ayam", "chicken_egg"],
@@ -350,6 +365,10 @@ export function availablePairs(topic: Topic): string[] {
   return Object.entries(REACTIONS)
     .filter(([key]) => key.startsWith(`${topic}:`))
     .map(([key]) => key.slice(topic.length + 1).replace("+", " + "));
+}
+
+export function substanceKind(name: string): SubstanceDefinition["kind"] {
+  return SUBSTANCES[name]?.kind ?? "liquid";
 }
 
 export function substanceColor(name: string): string {

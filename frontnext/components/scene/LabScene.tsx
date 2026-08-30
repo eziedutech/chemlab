@@ -2,8 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, OrbitControls } from "@react-three/drei";
-import { Beaker } from "./Beaker";
-import { PouringReagent } from "./PouringReagent";
+import { TopicScene } from "./TopicScene";
 
 /**
  * Root of the 3D lab.
@@ -55,8 +54,7 @@ export function LabScene() {
         <meshStandardMaterial color="#152135" roughness={0.92} metalness={0.04} />
       </mesh>
 
-      <Beaker />
-      <PouringReagent />
+      <TopicScene />
 
       <ContactShadows
         position={[0, 0.001, 0]}

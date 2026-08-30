@@ -1,4 +1,5 @@
 import type { ToolDescriptor, ToolResult } from "../getModelContext";
+import { TOPIC_SUBSTANCES } from "../../reactions/reactionDefinitions";
 import { useLabStore } from "../../../store/labStore";
 
 export const getLabState: ToolDescriptor = {
@@ -22,8 +23,13 @@ export const getLabState: ToolDescriptor = {
         precipitate: state.beaker.precipitate,
       },
       temperature_c: state.temperatureC,
+      lamp_brightness: state.lampBrightness,
+      object_state: state.objectState,
+      /** True while the scene is still animating a pour the agent asked for. */
+      busy: state.pourQueue.length > 0,
       observation_log: state.observationLog,
       safety_alert: state.safetyAlert,
+      available_substances: TOPIC_SUBSTANCES[state.activeTopic],
     };
   },
 };

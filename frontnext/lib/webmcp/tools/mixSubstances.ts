@@ -4,6 +4,7 @@ import {
   findReaction,
   normalizeSubstance,
   substanceColor,
+  substanceKind,
   SUBSTANCES,
   TOPIC_SUBSTANCES,
 } from "../../reactions/reactionDefinitions";
@@ -72,13 +73,19 @@ export const mixSubstances: ToolDescriptor = {
         : DEFAULT_AMOUNT_ML;
     const startingVolume = store.beaker.volumeMl;
     const headroom = Math.max(0, BEAKER_CAPACITY_ML - startingVolume);
-    const added = Math.min(Math.max(1, requested), headroom);
-    const clamped = added < requested;
 
-    // Only pour what is not already in the beaker.
+    // Only add what is not already in the beaker.
     const toPour = [a as string, b as string].filter(
       (name) => !store.beaker.substances.includes(name),
     );
+    // An egg displaces liquid, it does not add any, so only pourable reagents
+    // count towards the volume.
+    const pourableCount = toPour.filter(
+      (name) => substanceKind(name) !== "object",
+    ).length;
+    const added =
+      pourableCount === 0 ? 0 : Math.min(Math.max(1, requested), headroom);
+    const clamped = pourableCount > 0 && added < requested;
 
     const finalVolume = startingVolume + added;
     const outcome = {
@@ -92,6 +99,7 @@ export const mixSubstances: ToolDescriptor = {
       useLabStore.getState().enqueuePours([
         {
           substance: a as string,
+          kind: "pour",
           color: substanceColor(a as string),
           resultColor: reaction.resultColor,
           resultVolumeMl: finalVolume,
@@ -101,16 +109,20 @@ export const mixSubstances: ToolDescriptor = {
         },
       ]);
     } else {
-      const share = added / toPour.length;
+      const share = pourableCount > 0 ? added / pourableCount : 0;
+      let runningVolume = startingVolume;
       const jobs: Omit<PourJob, "id">[] = toPour.map((name, index) => {
         const isLast = index === toPour.length - 1;
+        const isObject = substanceKind(name) === "object";
+        if (!isObject) runningVolume += share;
         return {
           substance: name,
+          kind: isObject ? ("drop" as const) : ("pour" as const),
           color: substanceColor(name),
-          // Until the last reagent lands, the beaker just holds what was poured
+          // Until the last reagent lands, the beaker just holds what was added
           // so far. The reaction colour only appears once both are in.
           resultColor: isLast ? reaction.resultColor : substanceColor(name),
-          resultVolumeMl: startingVolume + share * (index + 1),
+          resultVolumeMl: runningVolume,
           resultBubbles: isLast ? reaction.hasBubbles : false,
           resultPrecipitate: isLast ? reaction.hasPrecipitate : false,
           outcome: isLast ? outcome : undefined,

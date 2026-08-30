@@ -41,6 +41,12 @@ export interface WebMcpStatus {
 export interface PourJob {
   id: number;
   substance: string;
+  /**
+   * How the substance gets into the beaker: poured from a bottle, or lowered
+   * in as an object. Each is animated by a different actor in the scene, and
+   * both work through this one queue so the order stays right.
+   */
+  kind: "pour" | "drop";
   /** Colour of the reagent itself, used for the bottle and the stream. */
   color: string;
   /** Beaker contents once this pour has landed. */
