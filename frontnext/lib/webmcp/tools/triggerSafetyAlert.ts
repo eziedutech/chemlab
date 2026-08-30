@@ -29,7 +29,10 @@ export const triggerSafetyAlert: ToolDescriptor = {
       displayed: true,
       reason,
       severity,
+      active_topic: useLabStore.getState().activeTopic,
       auto_dismiss_ms: AUTO_DISMISS_MS,
+      suggested_next_step:
+        "Explain to the student why this matters before carrying on.",
     };
   },
 };

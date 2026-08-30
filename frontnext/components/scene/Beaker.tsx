@@ -10,6 +10,7 @@ import {
   WALL_HEIGHT,
 } from "../../lib/scene/beakerGeometry";
 import { createScaleTexture } from "../../lib/scene/scaleTexture";
+import { Bubbles } from "./Bubbles";
 import { Liquid } from "./Liquid";
 
 /**
@@ -105,6 +106,7 @@ export function Beaker() {
       </mesh>
 
       <Liquid />
+      <Bubbles />
     </group>
   );
 }

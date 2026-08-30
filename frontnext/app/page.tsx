@@ -1,5 +1,6 @@
 import { AgentActivityIndicator } from "../components/AgentActivityIndicator";
 import { ObservationPanel } from "../components/dashboard/ObservationPanel";
+import { SafetyAlertBanner } from "../components/dashboard/SafetyAlertBanner";
 import { ToolList } from "../components/dashboard/ToolList";
 import { WebMcpStatusBadge } from "../components/dashboard/WebMcpStatusBadge";
 import { LabSceneCanvas } from "../components/scene/LabSceneCanvas";
@@ -28,6 +29,8 @@ export default function Home() {
           instructor, powered by WebMCP.
         </p>
       </header>
+
+      <SafetyAlertBanner />
 
       <LabSceneCanvas />
 

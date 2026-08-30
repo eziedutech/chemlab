@@ -12,6 +12,15 @@ import { useLabStore } from "../../store/labStore";
 
 /** Roughly how quickly the level and the colour catch up with the store. */
 const EASING_PER_SECOND = 2.6;
+/**
+ * Close enough to the target to stop.
+ *
+ * Exponential easing only approaches its target, so without this the level and
+ * the colour keep changing by amounts too small to see, and an idle lab never
+ * renders the same frame twice.
+ */
+const VOLUME_EPSILON = 0.05;
+const COLOR_EPSILON = 0.002;
 
 /**
  * The liquid in the beaker.
@@ -43,8 +52,22 @@ export function Liquid() {
 
     // Exponential easing, written so the result does not depend on frame rate.
     const step = 1 - Math.exp(-delta * EASING_PER_SECOND);
-    shownVolume.current += (beaker.volumeMl - shownVolume.current) * step;
-    shownColor.current.lerp(targetColor.current, step);
+
+    if (Math.abs(beaker.volumeMl - shownVolume.current) < VOLUME_EPSILON) {
+      shownVolume.current = beaker.volumeMl;
+    } else {
+      shownVolume.current += (beaker.volumeMl - shownVolume.current) * step;
+    }
+
+    const colorGap =
+      Math.abs(shownColor.current.r - targetColor.current.r) +
+      Math.abs(shownColor.current.g - targetColor.current.g) +
+      Math.abs(shownColor.current.b - targetColor.current.b);
+    if (colorGap < COLOR_EPSILON) {
+      shownColor.current.copy(targetColor.current);
+    } else {
+      shownColor.current.lerp(targetColor.current, step);
+    }
 
     const height = surfaceHeight(shownVolume.current) - BASE_HEIGHT;
     const visible = height > 0.002;
@@ -76,6 +99,9 @@ export function Liquid() {
           opacity={0.86}
           roughness={0.25}
           metalness={0}
+          /* Without this the liquid writes depth and hides the bubbles rising
+             inside it. */
+          depthWrite={false}
         />
       </mesh>
 

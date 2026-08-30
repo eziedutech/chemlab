@@ -47,7 +47,12 @@ export function ElectrolyteRig() {
 
   useFrame((_, delta) => {
     const target = useLabStore.getState().lampBrightness;
-    shown.current += (target - shown.current) * Math.min(1, delta * 3.4);
+    // Snap once it is close, so an idle lamp stops changing at all.
+    if (Math.abs(target - shown.current) < 0.002) {
+      shown.current = target;
+    } else {
+      shown.current += (target - shown.current) * Math.min(1, delta * 3.4);
+    }
 
     if (bulbMaterial.current) {
       bulbMaterial.current.emissiveIntensity = shown.current * 2.8;
