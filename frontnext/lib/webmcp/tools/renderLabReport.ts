@@ -29,7 +29,9 @@ export const renderLabReport: ToolDescriptor = {
     useLabStore.getState().pushAgentActivity("render_lab_report");
 
     const state = useLabStore.getState();
-    const language = lang === "en" ? "en" : "id";
+    // The agent may ask for a language; otherwise follow the interface.
+    const language =
+      lang === "en" || lang === "id" ? lang : state.uiLang;
 
     // Anything the agent leaves out is filled in from what the lab itself
     // recorded, so a report never comes back empty.

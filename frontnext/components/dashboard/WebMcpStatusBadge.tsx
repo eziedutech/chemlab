@@ -1,6 +1,7 @@
 "use client";
 
 import { useLabStore } from "../../store/labStore";
+import { t } from "../../lib/i18n";
 import { toolNames } from "../../lib/webmcp/registerTools";
 
 const BASE =
@@ -12,12 +13,13 @@ const BASE =
  */
 export function WebMcpStatusBadge() {
   const webmcp = useLabStore((state) => state.webmcp);
+  const uiLang = useLabStore((state) => state.uiLang);
 
   if (!webmcp.checked) {
     return (
       <span className={`${BASE} text-slate-400`}>
         <span className="h-1.5 w-1.5 rounded-full bg-slate-500" />
-        WebMCP: checking
+        {t(uiLang, "badgeChecking")}
       </span>
     );
   }
@@ -26,18 +28,21 @@ export function WebMcpStatusBadge() {
     return (
       <span
         className={`${BASE} text-amber-200/90`}
-        title={`Tools ready to register: ${toolNames.join(", ")}`}
+        title={`${t(uiLang, "badgeTitleMissing")}: ${toolNames.join(", ")}`}
       >
         <span className="h-1.5 w-1.5 rounded-full bg-amber-300" />
-        WebMCP: not detected
+        {t(uiLang, "badgeMissing")}
       </span>
     );
   }
 
   return (
-    <span className={`${BASE} text-teal-200/90`} title={toolNames.join(", ")}>
+    <span
+      className={`${BASE} text-teal-200/90`}
+      title={`${t(uiLang, "badgeTitleReady")}: ${toolNames.join(", ")}`}
+    >
       <span className="h-1.5 w-1.5 rounded-full bg-teal-300" />
-      WebMCP: detected, {webmcp.toolCount} tools registered
+      {t(uiLang, "badgeReady", { count: webmcp.toolCount })}
     </span>
   );
 }

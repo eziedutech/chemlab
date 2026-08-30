@@ -1,5 +1,7 @@
 import { create } from "zustand";
 
+import type { UiLang } from "../lib/i18n";
+
 export type Subject = "kimia" | "fisika";
 export type Topic = "asam_basa" | "elektrolit" | "massa_jenis";
 export type Severity = "info" | "warning";
@@ -140,6 +142,8 @@ interface LabState {
   mix: MixBatch | null;
   pourQueue: PourJob[];
   panel: PanelContent | null;
+  /** Language of the interface, and the default for generated text. */
+  uiLang: UiLang;
 
   /** Called on the first line of every tool execute, so the toast is proof of a real call. */
   pushAgentActivity: (toolName: string) => void;
@@ -148,6 +152,7 @@ interface LabState {
   setActiveExperiment: (subject: Subject, topic: Topic) => void;
   setSafetyAlert: (alert: SafetyAlert | null) => void;
   setPanel: (panel: PanelContent | null) => void;
+  setUiLang: (lang: UiLang) => void;
   appendObservation: (entry: string) => void;
   resetExperiment: (keepObservationLog?: boolean) => void;
 
@@ -184,6 +189,7 @@ export const useLabStore = create<LabState>((set) => ({
   mix: null,
   pourQueue: [],
   panel: null,
+  uiLang: "id",
 
   pushAgentActivity: (toolName) =>
     set((state) => ({
@@ -217,6 +223,8 @@ export const useLabStore = create<LabState>((set) => ({
   setSafetyAlert: (alert) => set({ safetyAlert: alert }),
 
   setPanel: (panel) => set({ panel }),
+
+  setUiLang: (lang) => set({ uiLang: lang }),
 
   appendObservation: (entry) =>
     set((state) => ({ observationLog: [...state.observationLog, entry] })),

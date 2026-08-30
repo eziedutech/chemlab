@@ -1,15 +1,20 @@
 "use client";
 
+import { t, type StringKey, type UiLang } from "../../lib/i18n";
 import { useLabStore } from "../../store/labStore";
 
 /** How the text was produced, said plainly rather than hidden. */
-const SOURCE_LABEL: Record<string, string> = {
-  static: "prepared text, checked by a person",
-  cache: "from cache",
-  llm: "written by the model just now",
-  fallback: "prepared text, model unavailable",
-  offline: "offline",
+const SOURCE_KEY: Record<string, StringKey> = {
+  static: "sourceStatic",
+  cache: "sourceCache",
+  llm: "sourceLlm",
+  fallback: "sourceFallback",
 };
+
+function sourceLabel(lang: UiLang, source: string): string {
+  const key = SOURCE_KEY[source];
+  return key ? t(lang, key) : source;
+}
 
 /**
  * Where step explanations and the finished lab report are shown.
@@ -22,16 +27,17 @@ export function ObservationPanel() {
   const observationLog = useLabStore((state) => state.observationLog);
   const temperature = useLabStore((state) => state.temperatureC);
   const beaker = useLabStore((state) => state.beaker);
+  const uiLang = useLabStore((state) => state.uiLang);
 
   return (
     <section className="glass-panel p-6">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-sm font-medium tracking-wide text-slate-200">
-          Observation panel
+          {t(uiLang, "panelTitle")}
         </h2>
         {panel && (
           <span className="text-xs text-slate-500">
-            {SOURCE_LABEL[panel.source] ?? panel.source}
+            {sourceLabel(uiLang, panel.source)}
           </span>
         )}
       </div>
@@ -40,7 +46,10 @@ export function ObservationPanel() {
         <article className="mt-4">
           <h3 className="text-base font-medium text-slate-100">
             {panel.stepNumber && panel.totalSteps
-              ? `Step ${panel.stepNumber} of ${panel.totalSteps}: ${panel.title}`
+              ? `${t(uiLang, "panelStep", {
+                  step: panel.stepNumber,
+                  total: panel.totalSteps,
+                })}: ${panel.title}`
               : panel.title}
           </h3>
           <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-300">
@@ -59,30 +68,31 @@ export function ObservationPanel() {
         </article>
       ) : (
         <p className="mt-3 text-sm text-slate-400">
-          Nothing to show yet. Ask the agent to explain a reaction step, or to
-          write up the experiment.
+          {t(uiLang, "panelEmpty")}
         </p>
       )}
 
       <dl className="mt-6 grid grid-cols-2 gap-3 border-t border-white/[0.07] pt-4 text-sm sm:grid-cols-4">
         <div>
-          <dt className="text-xs text-slate-500">Volume</dt>
+          <dt className="text-xs text-slate-500">{t(uiLang, "volume")}</dt>
           <dd className="font-mono text-slate-200">
             {Math.round(beaker.volumeMl)} mL
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Temperature</dt>
+          <dt className="text-xs text-slate-500">{t(uiLang, "temperature")}</dt>
           <dd className="font-mono text-slate-200">{temperature} C</dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">In the beaker</dt>
+          <dt className="text-xs text-slate-500">{t(uiLang, "inBeaker")}</dt>
           <dd className="text-slate-200">
-            {beaker.substances.length > 0 ? beaker.substances.join(", ") : "empty"}
+            {beaker.substances.length > 0
+              ? beaker.substances.join(", ")
+              : t(uiLang, "beakerEmpty")}
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Observations</dt>
+          <dt className="text-xs text-slate-500">{t(uiLang, "observations")}</dt>
           <dd className="font-mono text-slate-200">{observationLog.length}</dd>
         </div>
       </dl>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { t } from "../../lib/i18n";
 import { useLabStore } from "../../store/labStore";
 
 /** Matches the auto_dismiss_ms the tool reports back to the agent. */
@@ -17,6 +18,7 @@ const AUTO_DISMISS_MS = 8000;
 export function SafetyAlertBanner() {
   const alert = useLabStore((state) => state.safetyAlert);
   const setSafetyAlert = useLabStore((state) => state.setSafetyAlert);
+  const uiLang = useLabStore((state) => state.uiLang);
 
   useEffect(() => {
     if (!alert) return;
@@ -43,7 +45,7 @@ export function SafetyAlertBanner() {
       />
       <div>
         <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-          {warning ? "Safety warning" : "Safety note"}
+          {warning ? t(uiLang, "safetyWarning") : t(uiLang, "safetyNote")}
         </p>
         <p className="mt-1 text-sm leading-relaxed">{alert.reason}</p>
       </div>
@@ -52,7 +54,7 @@ export function SafetyAlertBanner() {
         onClick={() => setSafetyAlert(null)}
         className="ml-auto shrink-0 rounded-md px-2 py-1 text-xs text-slate-400 transition hover:text-slate-100"
       >
-        Dismiss
+        {t(uiLang, "dismiss")}
       </button>
     </div>
   );

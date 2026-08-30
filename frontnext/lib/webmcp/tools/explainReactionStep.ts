@@ -26,7 +26,9 @@ export const explainReactionStep: ToolDescriptor = {
     useLabStore.getState().pushAgentActivity("explain_reaction_step");
 
     const state = useLabStore.getState();
-    const language = lang === "en" ? "en" : "id";
+    // The agent may ask for a language; otherwise follow the interface.
+    const language =
+      lang === "en" || lang === "id" ? lang : state.uiLang;
 
     const response = await fetchExplanation({
       subject: state.activeSubject,
