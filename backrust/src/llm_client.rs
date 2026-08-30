@@ -11,7 +11,10 @@ const TIMEOUT: Duration = Duration::from_secs(20);
 
 /// Suffixes scanned for provider credentials, in the order they are tried.
 /// `LLM_BASE_URL` is the first provider, `LLM_BASE_URL_2` the next, and so on.
-const SUFFIXES: [&str; 5] = ["", "_2", "_3", "_4", "_5"];
+/// `_1` is accepted as another spelling of the first, since writing the set as
+/// 1, 2, 3 is the obvious thing to do and silently ignoring it would leave a
+/// provider configured but never called.
+const SUFFIXES: [&str; 6] = ["", "_1", "_2", "_3", "_4", "_5"];
 
 /// One provider.
 ///
@@ -35,19 +38,45 @@ impl LlmConfig {
             return None;
         }
 
+        // A provider's documentation usually shows the full completions URL, so
+        // that is what gets pasted in. The path is appended below, so strip it
+        // rather than sending a request to /chat/completions/chat/completions.
+        let base_url = base_url
+            .trim()
+            .trim_end_matches('/')
+            .trim_end_matches("/chat/completions")
+            .trim_end_matches('/');
+
         Some(Self {
-            base_url: base_url.trim().trim_end_matches('/').to_string(),
+            base_url: base_url.to_string(),
             model: model.trim().to_string(),
             api_key: api_key.trim().to_string(),
         })
     }
 
     /// Every provider configured, in the order they should be tried.
+    ///
+    /// Duplicates are dropped, so writing both the unnumbered set and `_1` with
+    /// the same values configures one provider rather than two attempts at the
+    /// same endpoint.
     pub fn all_from_env() -> Vec<Self> {
-        SUFFIXES
-            .iter()
-            .filter_map(|suffix| Self::from_suffix(suffix))
-            .collect()
+        let mut providers: Vec<Self> = Vec::new();
+
+        for suffix in SUFFIXES {
+            let Some(config) = Self::from_suffix(suffix) else {
+                continue;
+            };
+            let already_listed = providers.iter().any(|existing| {
+                existing.base_url == config.base_url
+                    && existing.model == config.model
+                    && existing.api_key == config.api_key
+            });
+            if !already_listed {
+                providers.push(config);
+            }
+        }
+
+        providers
     }
 }
 
