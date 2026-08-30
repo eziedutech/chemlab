@@ -177,10 +177,19 @@ cd frontnext && npm install && npm run dev
 The project is deployed with Dokploy on a self hosted VPS, with HTTPS issued by
 Let's Encrypt.
 
-Either deploy both services from `docker-compose.prod.yml` as one Compose
-service, or create two applications, one with build path `./backrust` and one
-with `./frontnext`. Both work, and neither needs build arguments: the frontend
-reads `API_BASE_URL` from its environment at runtime through `/runtime-config`.
+There are three compose files, and which one to use depends on how the
+deployment is organised. Neither arrangement needs build arguments: the
+frontend reads `API_BASE_URL` from its environment at runtime through
+`/runtime-config`.
+
+| File | Use it when |
+|---|---|
+| `docker-compose.yml` | Running locally. Publishes host ports |
+| `docker-compose.prod.yml` | One deployment unit runs both services |
+| `docker-compose.backrust.yml` and `docker-compose.frontnext.yml` | Each service is its own deployment unit, with its own environment and its own logs |
+
+Splitting them is safe because the two never talk to each other over a private
+network: the browser calls the API on its public hostname.
 
 Two services, on two hostnames:
 

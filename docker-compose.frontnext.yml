@@ -1,0 +1,23 @@
+# Frontend only, for a deployment that runs each service as its own unit.
+services:
+  frontnext:
+    build:
+      context: ./frontnext
+      args:
+        # Compiled into the bundle as the fallback. API_BASE_URL below is what
+        # normally decides, and that one is read at runtime.
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8080}
+    environment:
+      PORT: 3000
+      # Read at runtime, so pointing the page at another backend is a restart
+      # rather than a rebuild.
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:8080}
+    expose:
+      - "3000"
+    networks:
+      - dokploy-network
+    restart: unless-stopped
+
+networks:
+  dokploy-network:
+    external: true
