@@ -146,7 +146,7 @@ export function LabScene() {
         scale={2.1}
         blur={2.2}
         far={0.34}
-        resolution={512}
+        resolution={256}
         color="#05090f"
       />
       <ContactShadows
@@ -155,7 +155,7 @@ export function LabScene() {
         scale={3.6}
         blur={4}
         far={0.85}
-        resolution={512}
+        resolution={256}
         color="#070c14"
       />
 

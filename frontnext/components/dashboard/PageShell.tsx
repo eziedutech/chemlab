@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityConsole } from "./ActivityConsole";
 import { LabSceneCanvas } from "../scene/LabSceneCanvas";
 import { WebMcpRegistrar } from "../webmcp/WebMcpRegistrar";
@@ -11,6 +11,7 @@ import { ManualToolRunner } from "./ManualToolRunner";
 import { ModeToggle } from "./ModeToggle";
 import { ObservationPanel } from "./ObservationPanel";
 import { SafetyAlertBanner } from "./SafetyAlertBanner";
+import { TopicSwitcher } from "./TopicSwitcher";
 import { WebMcpStatusBadge } from "./WebMcpStatusBadge";
 import { t } from "../../lib/i18n";
 import { useLabStore } from "../../store/labStore";
@@ -23,10 +24,33 @@ import { useLabStore } from "../../store/labStore";
  * left rail is icons only for the same reason: reading material opens on
  * demand instead of occupying the room.
  */
+/** Whether the window is wide enough to show the right column by default. */
+function useWideScreen(): boolean {
+  const [wide, setWide] = useState(true);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const query = window.matchMedia("(min-width: 1024px)");
+    const update = () => setWide(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  return wide;
+}
+
 export function PageShell() {
   const uiLang = useLabStore((state) => state.uiLang);
   const mode = useLabStore((state) => state.mode);
-  const [panelOpen, setPanelOpen] = useState(false);
+  const wide = useWideScreen();
+  /*
+   * Null means "whatever the window size suggests": open on a laptop, out of
+   * the way on a phone. Once the button is pressed that choice wins, at any
+   * width, which is what the button is for.
+   */
+  const [override, setOverride] = useState<boolean | null>(null);
+  const panelsVisible = override ?? wide;
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden">
@@ -51,14 +75,27 @@ export function PageShell() {
       />
 
       {/* Top bar. */}
-      <header className="absolute inset-x-0 top-0 z-40 flex items-center justify-between gap-3 px-3 py-3 sm:px-5">
-        <div className="glass flex items-center gap-3 rounded-full px-4 py-2">
+      <header className="absolute inset-x-0 top-0 z-40 flex items-center justify-between gap-3 px-3 py-3 sm:px-5 md:grid md:grid-cols-[1fr_auto_1fr]">
+        {/* The mark and the name, and nothing else. The pill used to carry the
+            competition name as well, which made it a long bar of glass across
+            the corner for no reading anyone needed. */}
+        <div className="glass flex w-fit items-center gap-2 rounded-full py-1.5 pl-1.5 pr-4">
+          <img
+            src="/logo.png"
+            alt=""
+            width={53}
+            height={64}
+            className="h-6 w-auto"
+          />
           <span className="whitespace-nowrap text-sm font-semibold tracking-tight text-slate-100">
             EZI ChemLab
           </span>
-          <span className="hidden text-[11px] uppercase tracking-[0.22em] text-slate-400 sm:inline">
-            WebMCP Challenge
-          </span>
+        </div>
+
+        {/* Moving topics by hand, in the middle where the eye lands first.
+            It calls the same tool the agent calls. */}
+        <div className="hidden md:flex md:justify-center">
+          <TopicSwitcher />
         </div>
 
         <div className="flex flex-wrap items-center justify-end gap-2">
@@ -82,30 +119,41 @@ export function PageShell() {
 
       {/* On a narrow screen the right panel slides in from a button, rather
           than taking the room away from the experiment. */}
+      {/* Showing and hiding the right column, at every width.
+          It used to disappear above the large breakpoint, where the column is
+          always open, so there was no way to clear the panels off the bench
+          and no way to guess where the button had gone. */}
       <button
         type="button"
-        onClick={() => setPanelOpen((open) => !open)}
-        className="glass absolute bottom-4 right-4 z-40 rounded-full px-4 py-2 text-xs text-slate-100 lg:hidden"
+        onClick={() => setOverride(!panelsVisible)}
+        aria-expanded={panelsVisible}
+        className="glass absolute bottom-4 right-4 z-40 rounded-full px-4 py-2 text-xs text-slate-100 transition hover:bg-white/10"
       >
-        {panelOpen ? t(uiLang, "close") : t(uiLang, "labState")}
+        {panelsVisible ? t(uiLang, "hidePanels") : t(uiLang, "showPanels")}
       </button>
 
-      {/* The right column runs the full height of the window, which means its
-          empty space used to sit over the header and over the bench: a click on
-          the language or mode toggle landed on this element instead of on the
-          button, and a drag meant to orbit the camera did nothing. The column
-          itself now lets everything through and only the panels in it take a
-          pointer. */}
+      {/* The right column, shown or genuinely not rendered.
+
+          It used to be parked off screen with a transform, which is the usual
+          trick and did not work here: the class went on, the custom properties
+          were right, and the element did not move. Not rendering it is not a
+          workaround for that so much as the honest description of the state,
+          and it is what the button says it does.
+
+          It runs the full height of the window, so its empty space sits over
+          the header and over the bench. That used to swallow clicks on the
+          language and mode toggles and drags meant to orbit the camera, hence
+          the pointer events: the column passes everything through and only the
+          panels in it take a pointer. */}
+      {panelsVisible && (
       <aside
-        className={`pointer-events-none absolute right-0 top-0 z-30 flex h-full w-full max-w-sm flex-col gap-3 overflow-hidden p-3 pt-20 transition-transform sm:p-5 sm:pt-20 lg:translate-x-0 ${
-          panelOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
-        }`}
+        className="pointer-events-none absolute right-0 top-0 z-30 flex h-full w-full max-w-sm flex-col gap-3 overflow-hidden p-3 pt-20 sm:p-5 sm:pt-20"
       >
         {/* The reading matter scrolls. The runner is tall and used to push
             everything below it off the bottom of the column, which is what
             squeezed the console into a slit and left the whole column
             scrolling as one long strip. */}
-        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto [&>*]:pointer-events-auto">
+        <div className="scroll-quiet flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto [&>*]:pointer-events-auto">
           <LabStatePanel />
           <ObservationPanel />
           {mode === "manual" && <ManualToolRunner />}
@@ -119,6 +167,7 @@ export function PageShell() {
           <ActivityConsole />
         </div>
       </aside>
+      )}
 
     </div>
   );

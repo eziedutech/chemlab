@@ -1,5 +1,6 @@
 import type { ToolDescriptor, ToolResult } from "../getModelContext";
 import {
+  alreadyInBeaker,
   availablePairs,
   findReaction,
   normalizeSubstance,
@@ -84,7 +85,7 @@ export const mixSubstances: ToolDescriptor = {
     // already the call is a top up, so both are measured again, except an
     // object, which does not go in twice.
     const missing = [a as string, b as string].filter(
-      (name) => !store.beaker.substances.includes(name),
+      (name) => !alreadyInBeaker(name, store.beaker.substances),
     );
     const names =
       missing.length > 0
@@ -148,7 +149,9 @@ export const mixSubstances: ToolDescriptor = {
     });
 
     useLabStore.getState().startMix(jobs);
-    useLabStore.getState().appendObservation(reaction.observationEn);
+    useLabStore
+      .getState()
+      .appendObservation({ id: reaction.observationId, en: reaction.observationEn });
 
     return {
       success: true,

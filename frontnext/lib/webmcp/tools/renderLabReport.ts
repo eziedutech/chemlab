@@ -38,7 +38,7 @@ export const renderLabReport: ToolDescriptor = {
     const text =
       typeof observations === "string" && observations.trim().length > 0
         ? observations.trim()
-        : state.observationLog.join(" ");
+        : state.observationLog.map((entry) => entry.en).join(" ");
 
     if (!text) {
       return {

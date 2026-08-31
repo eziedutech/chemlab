@@ -1,13 +1,8 @@
 "use client";
 
-import { t } from "../../lib/i18n";
+import { t, topicLabel } from "../../lib/i18n";
+import { substanceLabel } from "../../lib/reactions/reactionDefinitions";
 import { useLabStore } from "../../store/labStore";
-
-const TOPIC_LABEL: Record<string, { id: string; en: string }> = {
-  asam_basa: { id: "Asam dan basa", en: "Acids and bases" },
-  elektrolit: { id: "Larutan elektrolit", en: "Electrolyte solutions" },
-  massa_jenis: { id: "Massa jenis", en: "Density" },
-};
 
 /**
  * What the lab holds right now, in the same terms get_lab_state reports to the
@@ -22,13 +17,15 @@ export function LabStatePanel() {
   const objectState = useLabStore((state) => state.objectState);
 
   const rows: [string, string][] = [
-    [t(uiLang, "topic"), TOPIC_LABEL[topic]?.[uiLang] ?? topic],
+    [t(uiLang, "topic"), topicLabel(topic, uiLang)],
     [t(uiLang, "volume"), `${Math.round(beaker.volumeMl)} mL`],
     [t(uiLang, "temperature"), `${temperature} C`],
     [
       t(uiLang, "inBeaker"),
+      // Named for a reader. The canonical names go to the agent, not here:
+      // "baking_soda" in an English interface is neither language.
       beaker.substances.length > 0
-        ? beaker.substances.join(", ")
+        ? beaker.substances.map((name) => substanceLabel(name, uiLang)).join(", ")
         : t(uiLang, "beakerEmpty"),
     ],
   ];
@@ -37,7 +34,10 @@ export function LabStatePanel() {
     rows.push([t(uiLang, "lamp"), `${Math.round(lamp * 100)}%`]);
   }
   if (topic === "massa_jenis" && objectState) {
-    rows.push([t(uiLang, "objectState"), objectState]);
+    rows.push([
+      t(uiLang, "objectState"),
+      t(uiLang, objectState === "floats" ? "objectFloats" : "objectSinks"),
+    ]);
   }
 
   return (

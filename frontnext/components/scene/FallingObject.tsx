@@ -10,8 +10,15 @@ import {
 import { POUR_DURATION_MS, useLabStore } from "../../store/labStore";
 
 const EGG_RADIUS = 0.11;
-/** Where the egg waits before the agent asks for it. */
-const REST: [number, number, number] = [0.98, EGG_RADIUS * 1.25, 0.36];
+/**
+ * Where the egg waits before the agent asks for it.
+ *
+ * It lies on its side there. An egg standing on end on a bench is a trick, not
+ * a still life, so the height is its short radius rather than its long one.
+ */
+const REST: [number, number, number] = [0.98, EGG_RADIUS, 0.36];
+/** Lying down on the bench, and upright once it is in the liquid. */
+const LYING = Math.PI / 2;
 const CARRY_HEIGHT = 1.4;
 
 const PHASE = {
@@ -80,6 +87,9 @@ export function FallingObject() {
         : state.objectState === "sinks"
           ? sunkHeight
           : REST[1];
+    // On the bench it lies down; in the beaker it stands, which is the shape
+    // the float and sink heights were measured against.
+    const restAngle = state.objectState ? 0 : LYING;
 
     if (!isDrop || !job) {
       // Not being handled right now: sit wherever the state says.
@@ -88,13 +98,17 @@ export function FallingObject() {
       group.position.z += ((state.objectState ? 0 : REST[2]) - group.position.z) *
         Math.min(1, delta * 6);
       group.position.y += (settledHeight - group.position.y) * Math.min(1, delta * 6);
-      group.rotation.z += (0 - group.rotation.z) * Math.min(1, delta * 5);
+      group.rotation.z += (restAngle - group.rotation.z) * Math.min(1, delta * 5);
       restingHeight.current = group.position.y;
       return;
     }
 
     elapsed.current += delta * 1000;
     const t = Math.min(1, elapsed.current / POUR_DURATION_MS);
+
+    // Picked up and turned the right way up on the way over, so it goes into
+    // the liquid standing, which is how it is read there.
+    group.rotation.z += (0 - group.rotation.z) * Math.min(1, delta * 4);
 
     if (t < PHASE.liftEnd) {
       const p = easeInOut(progressWithin(t, 0, PHASE.liftEnd));
@@ -132,7 +146,7 @@ export function FallingObject() {
   });
 
   return (
-    <group ref={holder} position={[REST[0], REST[1], REST[2]]}>
+    <group ref={holder} position={[REST[0], REST[1], REST[2]]} rotation={[0, 0, LYING]}>
       {/* An egg is a squashed sphere, which is all the shape this needs. */}
       <mesh scale={[1, 1.3, 1]}>
         <sphereGeometry args={[EGG_RADIUS, 24, 18]} />

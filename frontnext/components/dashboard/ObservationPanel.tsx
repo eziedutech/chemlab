@@ -76,9 +76,9 @@ export function ObservationPanel() {
           </h3>
           <ol className="mt-2 space-y-2 text-sm text-slate-400">
             {observationLog.map((entry, index) => (
-              <li key={`${index}-${entry.slice(0, 24)}`} className="flex gap-3">
+              <li key={`${index}-${entry.id.slice(0, 24)}`} className="flex gap-3">
                 <span className="font-mono text-xs text-slate-500">{index + 1}</span>
-                <span>{entry}</span>
+                <span>{uiLang === "id" ? entry.id : entry.en}</span>
               </li>
             ))}
           </ol>

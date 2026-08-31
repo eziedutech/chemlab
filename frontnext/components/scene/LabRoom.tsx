@@ -74,25 +74,28 @@ function shelfPlacements(count: number, levels: number[], jitter: number): Place
 }
 
 /**
- * The cupboards and drawers along the front of a side counter.
+ * The cupboards and drawers along the front of both side counters.
  *
- * Without them the counter is a long grey slab, which is what a placeholder
+ * Without them a counter is a long grey slab, which is what a placeholder
  * looks like. A teaching bench is a run of identical units, each a drawer over
  * a pair of doors, and repeating that is enough to say "storage" from across
- * the room. Everything is a box proud of the carcass by a few millimetres, so
- * the whole run costs a handful of draw calls and no textures at all.
+ * the room.
+ *
+ * Drawn as four instanced meshes for the whole room rather than as loose boxes.
+ * The loose version came to a hundred and forty four meshes, and a hundred and
+ * forty four draw calls for a background detail is the sort of thing that
+ * quietly takes the frame rate away from the experiment.
  */
-function CabinetRun({ side, x }: { side: -1 | 1; x: number }) {
+function CabinetRuns() {
+  const drawers = useRef<InstancedMesh>(null);
+  const doors = useRef<InstancedMesh>(null);
+  const drawerPulls = useRef<InstancedMesh>(null);
+  const doorPulls = useRef<InstancedMesh>(null);
+  const dummy = useMemo(() => new Object3D(), []);
+
   const runLength = ROOM_DEPTH - 1.8;
   const unitWidth = 1.1;
   const units = Math.floor(runLength / unitWidth);
-  const startZ = -(units * unitWidth) / 2 + unitWidth / 2;
-
-  // The face that looks onto the aisle, which is the one towards the middle of
-  // the room. Panels stand a little proud of it, handles a little proud again.
-  const faceX = x - side * ((COUNTER_DEPTH * 1.25) / 2);
-  const panelX = faceX - side * 0.012;
-  const handleX = faceX - side * 0.032;
 
   const carcass = COUNTER_HEIGHT - 0.1;
   const drawerHeight = 0.2;
@@ -100,50 +103,107 @@ function CabinetRun({ side, x }: { side: -1 | 1; x: number }) {
   const drawerY = carcass - drawerHeight / 2 - 0.03;
   const doorY = 0.05 + doorHeight / 2;
 
+  const layout = useMemo(() => {
+    const startZ = -(units * unitWidth) / 2 + unitWidth / 2;
+    const drawerAt: [number, number, number][] = [];
+    const doorAt: [number, number, number][] = [];
+    const drawerPullAt: [number, number, number][] = [];
+    const doorPullAt: [number, number, number][] = [];
+
+    for (const side of [-1, 1] as const) {
+      const x = side * (COUNTER_X + 0.2) + side * 0.12;
+      // The face onto the aisle is the one towards the middle of the room.
+      const faceX = x - side * ((COUNTER_DEPTH * 1.25) / 2);
+      const panelX = faceX - side * 0.012;
+      const pullX = faceX - side * 0.032;
+
+      for (let index = 0; index < units; index += 1) {
+        const z = startZ + index * unitWidth;
+        drawerAt.push([panelX, drawerY, z]);
+        drawerPullAt.push([pullX, drawerY, z]);
+        for (const half of [-1, 1]) {
+          doorAt.push([panelX, doorY, z + (half * (unitWidth - 0.06)) / 4]);
+          doorPullAt.push([pullX, doorY + doorHeight / 2 - 0.09, z + half * 0.045]);
+        }
+      }
+    }
+
+    return { drawerAt, doorAt, drawerPullAt, doorPullAt };
+  }, [units, drawerY, doorY, doorHeight]);
+
+  useMemo(() => {
+    const apply = (mesh: InstancedMesh | null, at: [number, number, number][], rotate: boolean) => {
+      if (!mesh) return;
+      at.forEach((position, index) => {
+        dummy.position.set(...position);
+        dummy.rotation.set(rotate ? Math.PI / 2 : 0, 0, 0);
+        dummy.scale.setScalar(1);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(index, dummy.matrix);
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+    };
+
+    queueMicrotask(() => {
+      apply(drawers.current, layout.drawerAt, false);
+      apply(doors.current, layout.doorAt, false);
+      apply(drawerPulls.current, layout.drawerPullAt, true);
+      apply(doorPulls.current, layout.doorPullAt, false);
+    });
+  }, [layout, dummy]);
+
+  const front = (
+    <meshStandardMaterial color="#6d7784" roughness={0.72} metalness={0.1} />
+  );
+  const metal = (
+    <meshStandardMaterial color="#aeb8c4" roughness={0.35} metalness={0.75} />
+  );
+
   return (
     <group>
-      {Array.from({ length: units }, (_, index) => {
-        const z = startZ + index * unitWidth;
-        return (
-          <group key={z} position={[0, 0, z]}>
-            {/* Drawer front, with its pull. */}
-            <mesh position={[panelX, drawerY, 0]}>
-              <boxGeometry args={[0.024, drawerHeight, unitWidth - 0.06]} />
-              <meshStandardMaterial color="#6d7784" roughness={0.72} metalness={0.1} />
-            </mesh>
-            <mesh position={[handleX, drawerY, 0]} rotation={[Math.PI / 2, 0, 0]}>
-              <cylinderGeometry args={[0.011, 0.011, unitWidth * 0.42, 8]} />
-              <meshStandardMaterial color="#aeb8c4" roughness={0.35} metalness={0.75} />
-            </mesh>
+      <instancedMesh
+        ref={drawers}
+        args={[undefined, undefined, layout.drawerAt.length]}
+        frustumCulled={false}
+      >
+        <boxGeometry args={[0.024, drawerHeight, unitWidth - 0.06]} />
+        {front}
+      </instancedMesh>
 
-            {/* Two doors below it, with a shadow gap between them. */}
-            {[-1, 1].map((half) => (
-              <mesh
-                key={half}
-                position={[panelX, doorY, (half * (unitWidth - 0.06)) / 4]}
-              >
-                <boxGeometry args={[0.024, doorHeight, unitWidth / 2 - 0.05]} />
-                <meshStandardMaterial color="#6d7784" roughness={0.72} metalness={0.1} />
-              </mesh>
-            ))}
-            {[-1, 1].map((half) => (
-              <mesh
-                key={half}
-                position={[handleX, doorY + doorHeight / 2 - 0.09, half * 0.045]}
-              >
-                <cylinderGeometry args={[0.009, 0.009, 0.11, 8]} />
-                <meshStandardMaterial color="#aeb8c4" roughness={0.35} metalness={0.75} />
-              </mesh>
-            ))}
-          </group>
-        );
-      })}
+      <instancedMesh
+        ref={doors}
+        args={[undefined, undefined, layout.doorAt.length]}
+        frustumCulled={false}
+      >
+        <boxGeometry args={[0.024, doorHeight, unitWidth / 2 - 0.05]} />
+        {front}
+      </instancedMesh>
 
-      {/* A plinth, set back, so the run does not sit flat on the floor. */}
-      <mesh position={[x, 0.025, 0]}>
-        <boxGeometry args={[COUNTER_DEPTH * 1.1, 0.05, runLength]} />
-        <meshStandardMaterial color="#4a535f" roughness={0.85} metalness={0.05} />
-      </mesh>
+      <instancedMesh
+        ref={drawerPulls}
+        args={[undefined, undefined, layout.drawerPullAt.length]}
+        frustumCulled={false}
+      >
+        <cylinderGeometry args={[0.011, 0.011, unitWidth * 0.42, 8]} />
+        {metal}
+      </instancedMesh>
+
+      <instancedMesh
+        ref={doorPulls}
+        args={[undefined, undefined, layout.doorPullAt.length]}
+        frustumCulled={false}
+      >
+        <cylinderGeometry args={[0.009, 0.009, 0.11, 8]} />
+        {metal}
+      </instancedMesh>
+
+      {/* A plinth per side, set back, so a run does not sit flat on the floor. */}
+      {[-1, 1].map((side) => (
+        <mesh key={side} position={[side * (COUNTER_X + 0.32), 0.025, 0]}>
+          <boxGeometry args={[COUNTER_DEPTH * 1.1, 0.05, runLength]} />
+          <meshStandardMaterial color="#4a535f" roughness={0.85} metalness={0.05} />
+        </mesh>
+      ))}
     </group>
   );
 }
@@ -167,7 +227,6 @@ function Shelving({ side }: { side: -1 | 1 }) {
         <boxGeometry args={[COUNTER_DEPTH * 1.25, COUNTER_HEIGHT - 0.1, ROOM_DEPTH - 1.8]} />
         <meshStandardMaterial color="#7e8896" roughness={0.75} metalness={0.08} />
       </mesh>
-      <CabinetRun side={side} x={x + side * 0.12} />
 
       {/* Two glass shelves above the counter, on thin uprights. */}
       {[1.72, 2.24].map((y) => (
@@ -378,6 +437,7 @@ export function LabRoom() {
 
       <Shelving side={-1} />
       <Shelving side={1} />
+      <CabinetRuns />
       <Glassware />
 
       {/* Task light over the island bench.

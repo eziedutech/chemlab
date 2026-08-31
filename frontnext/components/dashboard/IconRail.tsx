@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { STARTER_PROMPT, t, TOOL_SUMMARY, type StringKey } from "../../lib/i18n";
+import {
+  STARTER_PROMPT,
+  t,
+  TOOL_SUMMARY,
+  topicLabel,
+  type StringKey,
+} from "../../lib/i18n";
 import {
   TOPIC_SUBSTANCES,
   pairsFor,
@@ -58,12 +64,6 @@ const PANEL_TITLES: Record<PanelId, StringKey> = {
   credits: "navCredits",
 };
 
-const TOPIC_LABELS: Record<Topic, { id: string; en: string }> = {
-  asam_basa: { id: "Asam dan basa", en: "Acids and bases" },
-  elektrolit: { id: "Larutan elektrolit", en: "Electrolyte solutions" },
-  massa_jenis: { id: "Massa jenis dan gaya apung", en: "Density and buoyancy" },
-};
-
 /**
  * The icon rail down the left edge.
  *
@@ -116,6 +116,16 @@ export function IconRail() {
             <div className="space-y-4 text-base leading-relaxed text-slate-300">
               <p>{t(uiLang, "aboutBody")}</p>
               <p className="text-slate-400">{t(uiLang, "aboutHow")}</p>
+
+              <div className="border-t border-white/[0.08] pt-4">
+                <h3 className="font-medium text-slate-100">
+                  {t(uiLang, "aboutOpenTitle")}
+                </h3>
+                <p className="mt-2 text-slate-400">{t(uiLang, "aboutOpenBody")}</p>
+                <p className="mt-3 whitespace-pre-line text-slate-300">
+                  {t(uiLang, "aboutOpenSteps")}
+                </p>
+              </div>
             </div>
           )}
 
@@ -162,7 +172,7 @@ export function IconRail() {
               {(Object.keys(TOPIC_SUBSTANCES) as Topic[]).map((topic) => (
                 <div key={topic}>
                   <h3 className="font-medium text-slate-100">
-                    {TOPIC_LABELS[topic][uiLang]}
+                    {topicLabel(topic, uiLang)}
                     <span className="ml-2 font-mono text-sm text-slate-400">{topic}</span>
                   </h3>
                   <ul className="mt-2 space-y-1 text-slate-300">

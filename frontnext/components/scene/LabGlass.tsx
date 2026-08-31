@@ -63,9 +63,11 @@ export function LabGlass({ refracting }: { refracting: boolean }) {
     <MeshTransmissionMaterial
       transmissionSampler
       /* Each sample is a slightly different ray through the wall, and the
-         spread between them is the blur. Six is where the smear stops looking
-         like banding, and going higher only costs fill rate. */
-      samples={6}
+         spread between them is the blur. Each one is three texture fetches in
+         the fragment shader, over every pixel of glass on the screen, so this
+         is the most expensive number on the page. Four still reads as a smear
+         rather than as banding. */
+      samples={4}
       transmission={1}
       color="#ffffff"
       /* Zero, and it stays zero. This is the surface, and the surface is

@@ -67,7 +67,7 @@ export function ActivityConsole() {
       {open && (
         <div
           ref={scroller}
-          className="max-h-44 overflow-y-auto border-t border-white/[0.08] px-4 py-3"
+          className="scroll-quiet max-h-44 overflow-y-auto border-t border-white/[0.08] px-4 py-3"
         >
           {activity.length === 0 ? (
             <p className="font-mono text-[11px] leading-relaxed text-slate-400">

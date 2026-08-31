@@ -45,4 +45,21 @@ body::before {
   .glass-panel {
     @apply glass rounded-xl;
   }
+
+  /*
+   * Scrolls, without a scrollbar.
+   *
+   * The right column and the boxes inside it all scroll, and three grey
+   * gutters running down a page made of glass is a lot of furniture for
+   * something the wheel already does. The content still scrolls by wheel,
+   * trackpad, touch, and keyboard; only the bar is gone.
+   */
+  .scroll-quiet {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scroll-quiet::-webkit-scrollbar {
+    display: none;
+  }
 }

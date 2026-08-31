@@ -45,7 +45,7 @@ export interface ReactionDefinition {
 
 export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   air: {
-    color: "#cfe0ee",
+    color: "#9dc5e6",
     formula: "H₂O",
     kind: "liquid",
     labelId: "Air",
@@ -53,7 +53,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
     aliases: ["water", "air_tawar", "air_keran", "fresh_water", "plain_water"],
   },
   air_suling: {
-    color: "#e2eef7",
+    color: "#abd3f1",
     formula: "H₂O",
     kind: "liquid",
     labelId: "Air suling",
@@ -61,7 +61,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
     aliases: ["aquades", "akuades", "distilled_water", "aquadest"],
   },
   air_garam: {
-    color: "#c3d9ea",
+    color: "#91c0e4",
     formula: "NaCl (aq)",
     kind: "liquid",
     labelId: "Air garam",
@@ -69,7 +69,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
     aliases: ["larutan_garam", "salt_water", "brine", "air_asin"],
   },
   cuka: {
-    color: "#f0e4bf",
+    color: "#f0d687",
     formula: "CH₃COOH",
     kind: "liquid",
     labelId: "Cuka",
@@ -77,7 +77,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
     aliases: ["vinegar", "asam_cuka", "cuka_dapur", "asam_asetat", "acetic_acid"],
   },
   baking_soda: {
-    color: "#f3f6f9",
+    color: "#c5d6e7",
     formula: "NaHCO₃",
     kind: "powder",
     labelId: "Baking soda",
@@ -91,7 +91,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
     ],
   },
   garam: {
-    color: "#f2f5f8",
+    color: "#c5d5e5",
     formula: "NaCl",
     kind: "powder",
     labelId: "Garam",
@@ -99,7 +99,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
     aliases: ["salt", "nacl", "garam_dapur", "table_salt"],
   },
   gula: {
-    color: "#f6f1e4",
+    color: "#eddcb0",
     formula: "C₁₂H₂₂O₁₁",
     kind: "powder",
     labelId: "Gula",
@@ -115,7 +115,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
     aliases: ["litmus", "kertas_lakmus", "litmus_paper", "indikator_lakmus"],
   },
   pp: {
-    color: "#f4f0f7",
+    color: "#d6c3e4",
     formula: "C₂₀H₁₄O₄",
     kind: "liquid",
     labelId: "Indikator PP",
@@ -123,7 +123,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
     aliases: ["fenolftalein", "phenolphthalein", "indikator_pp", "pp_indicator"],
   },
   telur: {
-    color: "#f0e2cc",
+    color: "#ebcb97",
     formula: "",
     kind: "object",
     labelId: "Telur",
@@ -155,7 +155,7 @@ export const REACTIONS: Record<string, ReactionDefinition> = Object.fromEntries(
   // --- Topic: acids and bases -------------------------------------------
   entry("asam_basa", "cuka", "baking_soda", {
     id: "acid_base_co2",
-    resultColor: "#e8f4d4",
+    resultColor: "#d1f09c",
     hasBubbles: true,
     hasPrecipitate: false,
     temperatureChange: "endoterm",
@@ -179,7 +179,7 @@ export const REACTIONS: Record<string, ReactionDefinition> = Object.fromEntries(
   }),
   entry("asam_basa", "baking_soda", "air", {
     id: "base_dissolves",
-    resultColor: "#dfe9f4",
+    resultColor: "#abcaeb",
     hasBubbles: false,
     hasPrecipitate: false,
     temperatureChange: "endoterm",
@@ -215,7 +215,7 @@ export const REACTIONS: Record<string, ReactionDefinition> = Object.fromEntries(
   }),
   entry("asam_basa", "cuka", "pp", {
     id: "acid_pp_clear",
-    resultColor: "#eef2f7",
+    resultColor: "#bfd1e7",
     hasBubbles: false,
     hasPrecipitate: false,
     temperatureChange: "netral",
@@ -230,7 +230,7 @@ export const REACTIONS: Record<string, ReactionDefinition> = Object.fromEntries(
   // --- Topic: electrolytes ----------------------------------------------
   entry("elektrolit", "air", "garam", {
     id: "strong_electrolyte",
-    resultColor: "#cfe2f2",
+    resultColor: "#99c7ee",
     hasBubbles: false,
     hasPrecipitate: false,
     temperatureChange: "netral",
@@ -244,7 +244,7 @@ export const REACTIONS: Record<string, ReactionDefinition> = Object.fromEntries(
   }),
   entry("elektrolit", "air", "gula", {
     id: "non_electrolyte",
-    resultColor: "#e7e0d2",
+    resultColor: "#d8c8a8",
     hasBubbles: false,
     hasPrecipitate: false,
     temperatureChange: "netral",
@@ -258,7 +258,7 @@ export const REACTIONS: Record<string, ReactionDefinition> = Object.fromEntries(
   }),
   entry("elektrolit", "air", "cuka", {
     id: "weak_electrolyte",
-    resultColor: "#eee9d3",
+    resultColor: "#e4d8a2",
     hasBubbles: false,
     hasPrecipitate: false,
     temperatureChange: "netral",
@@ -272,7 +272,7 @@ export const REACTIONS: Record<string, ReactionDefinition> = Object.fromEntries(
   }),
   entry("elektrolit", "air_suling", "garam", {
     id: "strong_electrolyte_distilled",
-    resultColor: "#cfe2f2",
+    resultColor: "#99c7ee",
     hasBubbles: false,
     hasPrecipitate: false,
     temperatureChange: "netral",
@@ -288,7 +288,7 @@ export const REACTIONS: Record<string, ReactionDefinition> = Object.fromEntries(
   // --- Topic: density and Archimedes ------------------------------------
   entry("massa_jenis", "air", "garam", {
     id: "salt_water_formed",
-    resultColor: "#c3d9ea",
+    resultColor: "#91c0e4",
     hasBubbles: false,
     hasPrecipitate: false,
     temperatureChange: "netral",
@@ -301,7 +301,7 @@ export const REACTIONS: Record<string, ReactionDefinition> = Object.fromEntries(
   }),
   entry("massa_jenis", "air", "telur", {
     id: "egg_sinks",
-    resultColor: "#cfe0ee",
+    resultColor: "#9dc5e6",
     hasBubbles: false,
     hasPrecipitate: false,
     temperatureChange: "netral",
@@ -315,7 +315,7 @@ export const REACTIONS: Record<string, ReactionDefinition> = Object.fromEntries(
   }),
   entry("massa_jenis", "air_garam", "telur", {
     id: "egg_floats",
-    resultColor: "#c3d9ea",
+    resultColor: "#91c0e4",
     hasBubbles: false,
     hasPrecipitate: false,
     temperatureChange: "netral",
@@ -361,6 +361,27 @@ export function normalizeSubstance(raw: string): string | null {
     .replace(/[^a-z0-9_]/g, "");
   if (!normalized) return null;
   return ALIAS_LOOKUP[normalized] ?? null;
+}
+
+/**
+ * Substances that the beaker can already hold without being named.
+ *
+ * Salt water is not a bottle on the shelf, it is what is left after salt has
+ * been stirred into water. So a beaker holding water and salt already holds
+ * salt water, and asking for salt water again should not send a fresh cylinder
+ * to the bench: in the density topic that measured and poured a second lot of
+ * solution before the egg, which put the egg a step behind and changed the
+ * volume it was dropped into.
+ */
+export const DERIVED_FROM: Record<string, string[]> = {
+  air_garam: ["air", "garam"],
+};
+
+/** Whether what is in the beaker already amounts to this substance. */
+export function alreadyInBeaker(name: string, contents: string[]): boolean {
+  if (contents.includes(name)) return true;
+  const parts = DERIVED_FROM[name];
+  return parts ? parts.every((part) => contents.includes(part)) : false;
 }
 
 /** Look up a reaction for the active topic. Order of the two names is free. */

@@ -14,6 +14,24 @@ const LAMP: [number, number, number] = [1.05, 0, -0.18];
 
 const UP = new Vector3(0, 1, 0);
 
+/**
+ * A run of wire through a list of points.
+ *
+ * It is a path rather than a single straight line because a straight line from
+ * an electrode to the lamp goes through the beaker: the wire came out of the
+ * middle of the glass, which is not a thing a wire does. Routed over the rim
+ * instead, the way it is actually laid on a bench.
+ */
+function WirePath({ points }: { points: [number, number, number][] }) {
+  return (
+    <group>
+      {points.slice(1).map((point, index) => (
+        <Wire key={index} from={points[index]} to={point} />
+      ))}
+    </group>
+  );
+}
+
 /** A straight length of wire between two points in the scene. */
 function Wire({ from, to }: { from: [number, number, number]; to: [number, number, number] }) {
   const { position, quaternion, length } = useMemo(() => {
@@ -78,12 +96,22 @@ export function ElectrolyteRig() {
       {/* Two electrodes, dipping well below the liquid line. Different metals,
           which is how they are told apart in a school kit. */}
       {[-ELECTRODE_X, ELECTRODE_X].map((x) => (
-        <mesh key={x} position={[x, ELECTRODE_BOTTOM + electrodeHeight / 2, 0]}>
-          <boxGeometry args={[0.05, electrodeHeight, 0.015]} />
+        <mesh key={x} renderOrder={1} position={[x, ELECTRODE_BOTTOM + electrodeHeight / 2, 0]}>
+          {/* Square in section rather than a flat strip. A strip 15 thousandths
+              deep is honest to the real thing and it also vanishes the moment
+              the camera comes round to the side, which is most of the time. */}
+          <boxGeometry args={[0.042, electrodeHeight, 0.042]} />
           <meshStandardMaterial
             color={x < 0 ? "#b9c4d4" : "#c9a06a"}
             roughness={0.35}
             metalness={0.75}
+            /* The part below the surface has to stay visible.
+               The liquid is opaque, because only opaque things reach the
+               buffer the glass refracts, and an opaque liquid buries whatever
+               stands in it: the electrodes were cut off at the waterline. The
+               depth test comes off so they read through it, the same treatment
+               the bubbles get. */
+            depthTest={false}
           />
         </mesh>
       ))}
@@ -118,9 +146,31 @@ export function ElectrolyteRig() {
         <pointLight ref={glow} position={[0, 0.69, 0]} intensity={0} distance={3.2} color="#ffd79a" />
       </group>
 
-      {/* Circuit: one electrode to the lamp, the lamp back to the other. */}
-      <Wire from={[ELECTRODE_X, HOLDER_HEIGHT + 0.03, 0]} to={[LAMP[0], 0.55, LAMP[2]]} />
-      <Wire from={[-ELECTRODE_X, HOLDER_HEIGHT + 0.03, 0]} to={[LAMP[0] - 0.14, 0.04, LAMP[2]]} />
+      {/* Circuit: one electrode to the lamp, the lamp back to the other.
+
+          Both runs climb clear of the rim before they cross the beaker, then
+          come down beside the lamp rather than through it. The bulb is a
+          sphere of radius 0.1 and the base a disc of 0.19, so the two descents
+          are set 0.2 and 0.24 out from the centre line and only step in at the
+          height of the terminal they are joining. */}
+      <WirePath
+        points={[
+          [ELECTRODE_X, HOLDER_HEIGHT + 0.03, 0.05],
+          [ELECTRODE_X, HOLDER_HEIGHT + 0.17, 0.05],
+          [LAMP[0] + 0.2, HOLDER_HEIGHT + 0.17, LAMP[2]],
+          [LAMP[0] + 0.2, 0.57, LAMP[2]],
+          [LAMP[0] + 0.075, 0.57, LAMP[2]],
+        ]}
+      />
+      <WirePath
+        points={[
+          [-ELECTRODE_X, HOLDER_HEIGHT + 0.03, -0.05],
+          [-ELECTRODE_X, HOLDER_HEIGHT + 0.29, -0.05],
+          [LAMP[0] - 0.24, HOLDER_HEIGHT + 0.29, LAMP[2]],
+          [LAMP[0] - 0.24, 0.04, LAMP[2]],
+          [LAMP[0] - 0.17, 0.04, LAMP[2]],
+        ]}
+      />
     </group>
   );
 }

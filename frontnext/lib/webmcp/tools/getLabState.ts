@@ -33,7 +33,7 @@ export const getLabState: ToolDescriptor = {
         state.pourQueue.length > 0 ||
         (state.mix !== null && state.mix.stage !== "done"),
       mix_stage: state.mix ? state.mix.stage : null,
-      observation_log: state.observationLog,
+      observation_log: state.observationLog.map((entry) => entry.en),
       safety_alert: state.safetyAlert,
       available_substances: TOPIC_SUBSTANCES[state.activeTopic],
     };

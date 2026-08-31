@@ -112,6 +112,12 @@ export interface PanelContent {
   totalSteps?: number;
 }
 
+/** One line the lab recorded, ready to be read in either language. */
+export interface Observation {
+  id: string;
+  en: string;
+}
+
 export const EMPTY_BEAKER: BeakerState = {
   substances: [],
   color: "#dfe8ff",
@@ -138,7 +144,14 @@ interface LabState {
   activeTopic: Topic;
   beaker: BeakerState;
   temperatureC: number;
-  observationLog: string[];
+  /**
+   * What the lab itself recorded, in both languages.
+   *
+   * It used to be an English string, which meant the observation list stayed
+   * English while the rest of the interface was Indonesian. The agent and the
+   * API still get the English, since that is what they read.
+   */
+  observationLog: Observation[];
   safetyAlert: SafetyAlert | null;
   agentActivity: AgentActivity[];
   webmcp: WebMcpStatus;
@@ -174,7 +187,7 @@ interface LabState {
   setPanel: (panel: PanelContent | null) => void;
   setUiLang: (lang: UiLang) => void;
   setMode: (mode: "webmcp" | "manual") => void;
-  appendObservation: (entry: string) => void;
+  appendObservation: (entry: Observation) => void;
   resetExperiment: (keepObservationLog?: boolean) => void;
 
   /** Lay out the vessels and start filling them. */

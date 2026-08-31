@@ -118,9 +118,44 @@ const STRINGS = {
   objectState: { id: "Benda", en: "Object" },
   activity: { id: "Aktivitas agent", en: "Agent activity" },
   noActivity: { id: "Belum ada tool yang dipanggil.", en: "No tool has been called yet." },
+
+  switchTopic: { id: "Pindah topik", en: "Switch topic" },
+  showPanels: { id: "Tampilkan panel", en: "Show panels" },
+  hidePanels: { id: "Sembunyikan panel", en: "Hide panels" },
+  objectFloats: { id: "mengapung", en: "floats" },
+  objectSinks: { id: "tenggelam", en: "sinks" },
+
+  aboutOpenTitle: { id: "Membukanya dengan WebMCP", en: "Opening it with WebMCP" },
+  aboutOpenBody: {
+    id: "WebMCP masih baru, jadi hanya sebagian browser yang menyediakannya. Ada dua cara membuka halaman ini supaya agent bisa memanggil tool-nya sendiri.",
+    en: "WebMCP is new, so only some browsers expose it. There are two ways to open this page so an agent can call the tools itself.",
+  },
+  aboutOpenSteps: {
+    id:
+      "1. Aplikasi desktop ChatGPT. Buka https://chemlab.eziedutech.dev di browser bawaan aplikasinya, lalu minta agent menyebutkan tool yang tersedia. Ketujuh nama akan muncul.\n\n2. Chrome 149 ke atas. Buka chrome://flags/#enable-webmcp-testing, aktifkan, mulai ulang Chrome, lalu buka halaman ini.\n\nBadge di kanan atas mengatakan mana yang sedang berlaku. Kalau tertulis tidak terdeteksi, ganti ke mode Manual dan jalankan tool yang sama persis langsung dari halaman ini.",
+    en:
+      "1. The ChatGPT desktop app. Open https://chemlab.eziedutech.dev in its built in browser, then ask the agent to list its available tools. All seven names should come back.\n\n2. Chrome 149 or newer. Open chrome://flags/#enable-webmcp-testing, turn it on, restart Chrome, then open this page.\n\nThe badge in the top right says which of these is in force. When it says not detected, switch to Manual mode and run the very same tools straight from the page.",
+  },
 } as const;
 
 export type StringKey = keyof typeof STRINGS;
+
+/**
+ * The three topics, named for a reader.
+ *
+ * Kept here rather than in each panel, because the panels had drifted apart:
+ * one called the third topic "Massa jenis" and another "Massa jenis dan gaya
+ * apung", in an interface that is meant to be in one language at a time.
+ */
+export const TOPIC_LABEL: Record<string, { id: string; en: string }> = {
+  asam_basa: { id: "Asam dan basa", en: "Acids and bases" },
+  elektrolit: { id: "Larutan elektrolit", en: "Electrolyte solutions" },
+  massa_jenis: { id: "Massa jenis dan gaya apung", en: "Density and buoyancy" },
+};
+
+export function topicLabel(topic: string, lang: UiLang): string {
+  return TOPIC_LABEL[topic]?.[lang] ?? topic;
+}
 
 /** What each tool does, for a reader rather than for the agent. */
 export const TOOL_SUMMARY: Record<string, { id: string; en: string }> = {
