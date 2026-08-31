@@ -6,6 +6,8 @@
 [![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org)
 [![Rust](https://img.shields.io/badge/Rust-axum%200.7-orange.svg)](https://www.rust-lang.org)
 
+**[Live app](https://chemlab.eziedutech.dev)** and **[demo video](https://www.youtube.com/watch?v=tvAzGipPa9o)**
+
 ## Table of Contents
 
 - [What it is](#what-it-is)
@@ -40,6 +42,7 @@ student talks to the agent, and the simulation responds.
 ## How to test
 
 Live URL: **https://chemlab.eziedutech.dev**
+Demo video: **https://www.youtube.com/watch?v=tvAzGipPa9o**
 
 No account and no login are required, and the app is free to use. The page opens
 in English. `?lang=id` opens it in Indonesian, and the toggle in the header
