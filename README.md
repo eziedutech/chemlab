@@ -17,6 +17,7 @@
 - [Configuration](#configuration)
 - [Curriculum coverage](#curriculum-coverage)
 - [Credits and licenses](#credits-and-licenses)
+- [How this was built](#how-this-was-built)
 - [License](#license)
 
 ## What it is
@@ -281,6 +282,14 @@ is turned on a lathe from a profile the way the real thing is, the liquid, the
 bubbles, the electrodes, the lamp, the spatula and the egg. The floor tiles and
 the surround the glass reflects are drawn to a canvas at runtime rather than
 loaded. The only image file in the repository is the project's own logo.
+
+## How this was built
+
+The code in this repository was written with the assistance of AI coding agents,
+which is how a project of this size was built in the time the hackathon allowed.
+The product decisions, the reaction data, the curriculum mapping and the
+verification of what actually runs are the author's own, and the submission is
+owned entirely by the entrant.
 
 ## License
 
