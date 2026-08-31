@@ -105,12 +105,8 @@ const STRINGS = {
     en: "Three locked topics, with the substances available in each.",
   },
   creditsBody: {
-    id: "Ruangan, meja, cairan, gelembung, elektroda, lampu, spatula, dan telur dibangun dari primitif geometris di dalam kode. Aplikasi ini dirilis di bawah lisensi MIT.",
-    en: "The room, the benches, the liquid, the bubbles, the electrodes, the lamp, the spatula and the egg are built from geometric primitives in code. The application is released under the MIT licence.",
-  },
-  creditsAsset: {
-    id: "Mesh gelas kimia dan gelas ukur berasal dari \"Chemistry Glassware\" oleh maxdragonn, dipakai di bawah lisensi CC BY 4.0, dengan label merek dihapus dan material diganti.",
-    en: "The beaker and measuring cylinder meshes come from \"Chemistry Glassware\" by maxdragonn, used under CC BY 4.0, with the branding removed and the materials replaced.",
+    id: "Seluruh model 3D di halaman ini dibuat dari primitif geometris di dalam kode. Tidak ada aset pihak ketiga. Dirilis di bawah lisensi MIT.",
+    en: "Every 3D model on this page is built from geometric primitives in code. There are no third party assets. Released under the MIT licence.",
   },
   toolsDisplayNote: {
     id: "Deskripsi yang dibaca agent ditulis dalam Bahasa Inggris. Di bawah ini ringkasannya.",

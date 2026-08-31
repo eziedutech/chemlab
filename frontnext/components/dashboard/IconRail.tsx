@@ -192,7 +192,6 @@ export function IconRail() {
           {open === "credits" && (
             <div className="space-y-3 text-sm leading-relaxed text-slate-300">
               <p>{t(uiLang, "creditsBody")}</p>
-              <p className="text-slate-400">{t(uiLang, "creditsAsset")}</p>
             </div>
           )}
         </GlassModal>

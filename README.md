@@ -277,10 +277,10 @@ Topics are mapped to the Indonesian Kurikulum Merdeka by phase.
 
 ## Credits and licenses
 
-One third party asset is used, the glassware meshes, under CC BY 4.0. It is
-credited in [ATTRIBUTION.md](ATTRIBUTION.md). Everything else in the scene, the
-room, the benches, the liquid, the bubbles, the electrodes, the lamp, the
-spatula and the egg, is built from geometric primitives in code.
+There are no third party assets. Every piece of geometry on the page is built
+in code: the room and its benches and shelving, the glassware, which is turned
+on a lathe from a profile the way the real thing is, the liquid, the bubbles,
+the electrodes, the lamp, the spatula and the egg.
 
 ## License
 

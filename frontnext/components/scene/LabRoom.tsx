@@ -1,8 +1,11 @@
 "use client";
 
-import { useMemo, useRef } from "react";
-import { BufferGeometry, InstancedMesh, Object3D } from "three";
-import { GLASSWARE_NODES, useGlasswarePiece } from "../../lib/scene/glassware";
+import { useEffect, useMemo, useRef } from "react";
+import { InstancedMesh, Object3D } from "three";
+import {
+  createBeakerGeometry,
+  createCylinderGeometry,
+} from "../../lib/scene/glassProfiles";
 
 /**
  * The room the experiment stands in.
@@ -112,12 +115,18 @@ function Glassware() {
   const flasks = useRef<InstancedMesh>(null);
   const dummy = useMemo(() => new Object3D(), []);
 
-  // The same imported glassware as the bench, standing on the shelves. It is
-  // metres away and never touched, so it gets a cheap material and no
-  // transmission.
-  const beaker = useGlasswarePiece(GLASSWARE_NODES.beakerSmall);
-  const erlenmeyer = useGlasswarePiece(GLASSWARE_NODES.erlenmeyer);
-  const cylinder = useGlasswarePiece(GLASSWARE_NODES.cylinderShort);
+  // The same shapes as the bench, at room scale. They are metres away and
+  // never touched, so they get a plain material and no transmission.
+  const jarGeometry = useMemo(() => createBeakerGeometry(0.05, 0.11), []);
+  const cylinderGeometry = useMemo(() => createCylinderGeometry(0.026, 0.19), []);
+
+  useEffect(
+    () => () => {
+      jarGeometry.dispose();
+      cylinderGeometry.dispose();
+    },
+    [jarGeometry, cylinderGeometry],
+  );
 
   // Heights are the surfaces themselves. The imported meshes carry their origin
   // at the base, so anything else leaves them hovering above the shelf.
@@ -133,9 +142,6 @@ function Glassware() {
     () => shelfPlacements(FLASK_COUNT, [lowerShelf, counterTop], 0.3),
     [lowerShelf, counterTop],
   );
-
-  /** The model is drawn in centimetres; the room is in metres. */
-  const MODEL_TO_METRES = 0.01;
 
   useMemo(() => {
     const apply = (
@@ -156,10 +162,10 @@ function Glassware() {
 
     // Refs are populated by the time this runs on the client render pass.
     queueMicrotask(() => {
-      apply(bottles.current, bottlePlacements, beaker ? MODEL_TO_METRES : 1);
-      apply(flasks.current, flaskPlacements, erlenmeyer ? MODEL_TO_METRES : 1);
+      apply(bottles.current, bottlePlacements, 1);
+      apply(flasks.current, flaskPlacements, 1);
     });
-  }, [bottlePlacements, flaskPlacements, dummy, beaker, erlenmeyer]);
+  }, [bottlePlacements, flaskPlacements, dummy]);
 
   const shelfMaterial = (
     <meshPhysicalMaterial
@@ -178,23 +184,17 @@ function Glassware() {
     <group>
       <instancedMesh
         ref={bottles}
-        args={[
-          (beaker?.mesh.geometry ?? cylinder?.mesh.geometry) as BufferGeometry | undefined,
-          undefined,
-          BOTTLE_COUNT,
-        ]}
+        args={[jarGeometry, undefined, BOTTLE_COUNT]}
         frustumCulled={false}
       >
-        {!beaker && !cylinder && <cylinderGeometry args={[0.055, 0.06, 0.2, 8]} />}
         {shelfMaterial}
       </instancedMesh>
 
       <instancedMesh
         ref={flasks}
-        args={[erlenmeyer?.mesh.geometry as BufferGeometry | undefined, undefined, FLASK_COUNT]}
+        args={[cylinderGeometry, undefined, FLASK_COUNT]}
         frustumCulled={false}
       >
-        {!erlenmeyer && <coneGeometry args={[0.085, 0.2, 10]} />}
         {shelfMaterial}
       </instancedMesh>
     </group>
