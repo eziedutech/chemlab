@@ -255,7 +255,9 @@ Pointing the frontend at a different backend later is a change to
 
 The backend is provider agnostic. Any endpoint that implements
 `POST /v1/chat/completions` in the OpenAI format works, so switching providers is
-an environment change and not a code change.
+an environment change and not a code change. The deployment is configured with
+`gpt-5.4-mini` and `gpt-oss-120b`, and a report says which model wrote it in its
+`model` field.
 
 More than one can be configured. Numbered sets are tried in order, and a
 provider that is out of quota, unreachable, or slow is passed over for the next
