@@ -36,7 +36,16 @@ const PHASE = {
 const POUR_POSITION: [number, number, number] = [0.17, 1.24, 0];
 const CARRY_HEIGHT = 1.48;
 const TIP_ANGLE = -2.05;
-const SCOOP_TIP_ANGLE = -1.5;
+/*
+ * The spatula turns the other way, and the sign is the whole point.
+ *
+ * Its bowl sits on the negative side of the pivot and its handle on the
+ * positive side, the mirror of a cylinder whose mouth is the pivot. Turning it
+ * the same way as a cylinder therefore dropped the handle and lifted the bowl,
+ * so the powder was tipped out upside down. Turning it the other way puts the
+ * bowl over the beaker, which is how a hand does it.
+ */
+const SCOOP_TIP_ANGLE = 1.5;
 
 function easeInOut(t: number): number {
   return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
@@ -313,8 +322,14 @@ export function Vessel({ job, slotIndex, total, kind, orderIndex }: VesselProps)
                 />
                 <meshStandardMaterial
                   color={contentColor}
-                  transparent
-                  opacity={0.88}
+          /* Opaque, and it has to be.
+
+             The renderer builds the buffer the glass refracts from opaque
+             objects only, and the glass at full transmission shows that buffer
+             and nothing else. Anything marked transparent inside a vessel is
+             therefore not merely faint, it is absent: the liquid disappeared
+             the moment the glass started refracting. Depth and colour do the
+             work that the alpha used to. */
                   roughness={0.25}
                 />
               </mesh>
@@ -322,8 +337,6 @@ export function Vessel({ job, slotIndex, total, kind, orderIndex }: VesselProps)
                 <circleGeometry args={[CYLINDER_RADIUS - 0.012, 32]} />
                 <meshStandardMaterial
                   color={contentColor}
-                  transparent
-                  opacity={0.95}
                   roughness={0.12}
                 />
               </mesh>

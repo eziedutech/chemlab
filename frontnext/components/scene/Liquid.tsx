@@ -95,13 +95,16 @@ export function Liquid() {
         <cylinderGeometry args={[LIQUID_RADIUS, LIQUID_RADIUS, 1, 48]} />
         <meshStandardMaterial
           ref={bodyMaterial}
-          transparent
-          opacity={0.86}
+          /* Opaque, and it has to be.
+
+             The renderer builds the buffer the glass refracts from opaque
+             objects only, and the glass at full transmission shows that buffer
+             and nothing else. Anything marked transparent inside a vessel is
+             therefore not merely faint, it is absent: the liquid disappeared
+             the moment the glass started refracting. Depth and colour do the
+             work that the alpha used to. */
           roughness={0.25}
           metalness={0}
-          /* Without this the liquid writes depth and hides the bubbles rising
-             inside it. */
-          depthWrite={false}
         />
       </mesh>
 
@@ -110,8 +113,6 @@ export function Liquid() {
         <circleGeometry args={[LIQUID_RADIUS, 48]} />
         <meshStandardMaterial
           ref={surfaceMaterial}
-          transparent
-          opacity={0.95}
           roughness={0.12}
           metalness={0}
         />

@@ -97,17 +97,27 @@ export function PageShell() {
           itself now lets everything through and only the panels in it take a
           pointer. */}
       <aside
-        className={`pointer-events-none absolute right-0 top-0 z-30 flex h-full w-full max-w-sm flex-col gap-3 overflow-y-auto p-3 pt-20 transition-transform [&>*]:pointer-events-auto sm:p-5 sm:pt-20 lg:translate-x-0 ${
+        className={`pointer-events-none absolute right-0 top-0 z-30 flex h-full w-full max-w-sm flex-col gap-3 overflow-hidden p-3 pt-20 transition-transform sm:p-5 sm:pt-20 lg:translate-x-0 ${
           panelOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
         }`}
       >
-        <LabStatePanel />
-        <ObservationPanel />
-        {mode === "manual" && <ManualToolRunner />}
-        {/* The console of tool calls sits at the foot of this column rather
-            than across the bench, so the lab itself is left clear. The starter
-            prompt is not repeated here: it already opens from the rail. */}
-        <ActivityConsole />
+        {/* The reading matter scrolls. The runner is tall and used to push
+            everything below it off the bottom of the column, which is what
+            squeezed the console into a slit and left the whole column
+            scrolling as one long strip. */}
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto [&>*]:pointer-events-auto">
+          <LabStatePanel />
+          <ObservationPanel />
+          {mode === "manual" && <ManualToolRunner />}
+        </div>
+
+        {/* The console keeps its own place at the foot of the column, whatever
+            is above it. It is the record of what the agent did, so it should
+            not be the thing that gets pushed out of sight. The starter prompt
+            is not repeated here: it already opens from the rail. */}
+        <div className="pointer-events-auto shrink-0">
+          <ActivityConsole />
+        </div>
       </aside>
 
     </div>

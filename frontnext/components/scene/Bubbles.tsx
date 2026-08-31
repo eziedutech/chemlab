@@ -106,6 +106,7 @@ export function Bubbles() {
       ref={meshRef}
       args={[undefined, undefined, COUNT]}
       visible={false}
+      renderOrder={2}
       /* The bounding sphere is the one bubble at the origin, so leaving culling
          on would drop the whole column. */
       frustumCulled={false}
@@ -113,10 +114,13 @@ export function Bubbles() {
       <sphereGeometry args={[0.019, 8, 6]} />
       <meshStandardMaterial
         color="#f4fbff"
-        transparent
-        opacity={0.7}
         roughness={0.1}
         metalness={0}
+        /* Opaque for the same reason the liquid is: only opaque objects reach
+           the buffer the glass refracts. The depth test comes off instead, so
+           the bubbles still read through the liquid they rise in rather than
+           being buried by it, and `renderOrder` puts them after it. */
+        depthTest={false}
         depthWrite={false}
       />
     </instancedMesh>
