@@ -66,14 +66,14 @@ export function createScaleTexture(
     const y = yForVolume(volume);
 
     ctx.beginPath();
-    ctx.strokeStyle = isMajor ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.4)";
-    ctx.lineWidth = isMajor ? 3.5 : 2;
+    ctx.strokeStyle = isMajor ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.55)";
+    ctx.lineWidth = isMajor ? fontPx * 0.13 : fontPx * 0.075;
     ctx.moveTo(left, y);
     ctx.lineTo(left + (isMajor ? majorLength : minorLength), y);
     ctx.stroke();
 
     if (isMajor) {
-      ctx.fillStyle = "rgba(255,255,255,0.82)";
+      ctx.fillStyle = "rgba(255,255,255,0.94)";
       ctx.font = `600 ${fontPx}px ui-sans-serif, system-ui, sans-serif`;
       ctx.textBaseline = "middle";
       ctx.fillText(String(volume), left + majorLength + fontPx * 0.45, y);
@@ -82,7 +82,7 @@ export function createScaleTexture(
 
   // Unit label, beside the top mark rather than above it, where the curve of
   // the rim would cut it off.
-  ctx.fillStyle = "rgba(255,255,255,0.65)";
+  ctx.fillStyle = "rgba(255,255,255,0.78)";
   ctx.font = `500 ${Math.round(fontPx * 0.85)}px ui-sans-serif, system-ui, sans-serif`;
   ctx.textBaseline = "middle";
   ctx.fillText("mL", left + majorLength + fontPx * 2.8, yForVolume(maxMl));

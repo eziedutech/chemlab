@@ -54,11 +54,11 @@ export function GlassModal({ title, onClose, children }: GlassModalProps) {
       />
       <div className="glass-panel relative flex max-h-[82vh] w-full max-w-2xl flex-col overflow-hidden">
         <div className="flex items-center justify-between gap-4 border-b border-white/[0.08] px-6 py-4">
-          <h2 className="text-sm font-medium tracking-wide text-slate-100">{title}</h2>
+          <h2 className="text-base font-medium tracking-wide text-slate-100">{title}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md px-2 py-1 text-xs text-slate-400 transition hover:text-slate-100"
+            className="rounded-md px-2 py-1 text-sm text-slate-400 transition hover:text-slate-100"
           >
             {t(uiLang, "close")}
           </button>

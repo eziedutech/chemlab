@@ -113,7 +113,7 @@ export function IconRail() {
       {open && (
         <GlassModal title={t(uiLang, PANEL_TITLES[open])} onClose={() => setOpen(null)}>
           {open === "info" && (
-            <div className="space-y-4 text-sm leading-relaxed text-slate-300">
+            <div className="space-y-4 text-base leading-relaxed text-slate-300">
               <p>{t(uiLang, "aboutBody")}</p>
               <p className="text-slate-400">{t(uiLang, "aboutHow")}</p>
             </div>
@@ -121,11 +121,11 @@ export function IconRail() {
 
           {open === "commands" && (
             <div className="space-y-4">
-              <p className="text-sm leading-relaxed text-slate-300">
+              <p className="text-base leading-relaxed text-slate-300">
                 {t(uiLang, "commandsBody")}
               </p>
               <StarterPromptButton bare />
-              <pre className="whitespace-pre-wrap rounded-lg border border-white/10 bg-slate-950/50 p-4 text-xs leading-relaxed text-slate-400">
+              <pre className="whitespace-pre-wrap rounded-lg border border-white/10 bg-slate-950/50 p-4 text-sm leading-relaxed text-slate-400">
                 {STARTER_PROMPT}
               </pre>
             </div>
@@ -133,17 +133,17 @@ export function IconRail() {
 
           {open === "tools" && (
             <>
-            <p className="mb-3 text-xs leading-relaxed text-slate-400">
+            <p className="mb-3 text-sm leading-relaxed text-slate-400">
               {t(uiLang, "toolsDisplayNote")}
             </p>
-            <ol className="divide-y divide-white/[0.07] text-sm">
+            <ol className="divide-y divide-white/[0.07] text-base">
               {toolDescriptors.map((tool, index) => (
                 <li key={tool.name} className="flex gap-4 py-3 first:pt-0 last:pb-0">
-                  <span className="w-4 shrink-0 pt-0.5 text-right font-mono text-xs text-slate-400">
+                  <span className="w-4 shrink-0 pt-0.5 text-right font-mono text-sm text-slate-400">
                     {index + 1}
                   </span>
                   <div>
-                    <span className="font-mono text-[13px] text-lab-accent">
+                    <span className="font-mono text-sm text-lab-accent">
                       {tool.name}
                     </span>
                     <p className="mt-1 leading-relaxed text-slate-400">
@@ -157,27 +157,27 @@ export function IconRail() {
           )}
 
           {open === "topics" && (
-            <div className="space-y-5 text-sm">
+            <div className="space-y-5 text-base">
               <p className="leading-relaxed text-slate-300">{t(uiLang, "topicsBody")}</p>
               {(Object.keys(TOPIC_SUBSTANCES) as Topic[]).map((topic) => (
                 <div key={topic}>
                   <h3 className="font-medium text-slate-100">
                     {TOPIC_LABELS[topic][uiLang]}
-                    <span className="ml-2 font-mono text-xs text-slate-400">{topic}</span>
+                    <span className="ml-2 font-mono text-sm text-slate-400">{topic}</span>
                   </h3>
                   <ul className="mt-2 space-y-1 text-slate-300">
                     {TOPIC_SUBSTANCES[topic].map((name) => (
                       <li key={name} className="flex items-baseline gap-2">
                         <span>{substanceLabel(name, uiLang)}</span>
                         {substanceFormula(name) && (
-                          <span className="font-mono text-xs text-lab-accent">
+                          <span className="font-mono text-sm text-lab-accent">
                             {substanceFormula(name)}
                           </span>
                         )}
                       </li>
                     ))}
                   </ul>
-                  <ul className="mt-3 space-y-1 text-xs text-slate-400">
+                  <ul className="mt-3 space-y-1 text-sm text-slate-400">
                     {pairsFor(topic).map(([a, b]) => (
                       <li key={`${a}+${b}`}>
                         {substanceLabel(a, uiLang)} + {substanceLabel(b, uiLang)}
@@ -190,7 +190,7 @@ export function IconRail() {
           )}
 
           {open === "credits" && (
-            <div className="space-y-3 text-sm leading-relaxed text-slate-300">
+            <div className="space-y-3 text-base leading-relaxed text-slate-300">
               <p>{t(uiLang, "creditsBody")}</p>
             </div>
           )}

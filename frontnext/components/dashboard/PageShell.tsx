@@ -11,7 +11,6 @@ import { ManualToolRunner } from "./ManualToolRunner";
 import { ModeToggle } from "./ModeToggle";
 import { ObservationPanel } from "./ObservationPanel";
 import { SafetyAlertBanner } from "./SafetyAlertBanner";
-import { StarterPromptButton } from "./StarterPromptButton";
 import { WebMcpStatusBadge } from "./WebMcpStatusBadge";
 import { t } from "../../lib/i18n";
 import { useLabStore } from "../../store/labStore";
@@ -37,14 +36,22 @@ export function PageShell() {
       <div className="absolute inset-0">
         <LabSceneCanvas />
       </div>
-      {/* Enough shading for glass panels to stay legible over a lit room. */}
+      {/* A vignette, and only a vignette.
+
+          This used to be a wash reaching 62 per cent black over the whole
+          window, which is a sheet of smoked film laid across the lab. No
+          material setting survives that: the glass was reading grey because
+          everything was. The panels carry their own dark fill and do not need
+          the page dimmed behind them, so the shading now stays at the corners
+          where the panels actually sit and leaves the middle of the bench
+          alone. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(135%_105%_at_40%_15%,rgba(6,11,20,0.06),rgba(6,11,20,0.62))]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_95%_at_50%_45%,rgba(6,11,20,0)_38%,rgba(6,11,20,0.16)_68%,rgba(6,11,20,0.42)_100%)]"
       />
 
       {/* Top bar. */}
-      <header className="absolute inset-x-0 top-0 z-30 flex items-center justify-between gap-3 px-3 py-3 sm:px-5">
+      <header className="absolute inset-x-0 top-0 z-40 flex items-center justify-between gap-3 px-3 py-3 sm:px-5">
         <div className="glass flex items-center gap-3 rounded-full px-4 py-2">
           <span className="whitespace-nowrap text-sm font-semibold tracking-tight text-slate-100">
             EZI ChemLab
@@ -83,22 +90,26 @@ export function PageShell() {
         {panelOpen ? t(uiLang, "close") : t(uiLang, "labState")}
       </button>
 
+      {/* The right column runs the full height of the window, which means its
+          empty space used to sit over the header and over the bench: a click on
+          the language or mode toggle landed on this element instead of on the
+          button, and a drag meant to orbit the camera did nothing. The column
+          itself now lets everything through and only the panels in it take a
+          pointer. */}
       <aside
-        className={`absolute right-0 top-0 z-30 flex h-full w-full max-w-sm flex-col gap-3 overflow-y-auto p-3 pt-20 transition-transform sm:p-5 sm:pt-20 lg:translate-x-0 ${
+        className={`pointer-events-none absolute right-0 top-0 z-30 flex h-full w-full max-w-sm flex-col gap-3 overflow-y-auto p-3 pt-20 transition-transform [&>*]:pointer-events-auto sm:p-5 sm:pt-20 lg:translate-x-0 ${
           panelOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"
         }`}
       >
         <LabStatePanel />
         <ObservationPanel />
-        {mode === "manual" ? <ManualToolRunner /> : <StarterPromptButton />}
-
+        {mode === "manual" && <ManualToolRunner />}
+        {/* The console of tool calls sits at the foot of this column rather
+            than across the bench, so the lab itself is left clear. The starter
+            prompt is not repeated here: it already opens from the rail. */}
+        <ActivityConsole />
       </aside>
 
-      {/* The console sits bottom left, clear of the right column and of the
-          button that opens it on a narrow screen. */}
-      <div className="pointer-events-none absolute bottom-4 left-3 z-30 sm:left-5">
-        <ActivityConsole />
-      </div>
     </div>
   );
 }

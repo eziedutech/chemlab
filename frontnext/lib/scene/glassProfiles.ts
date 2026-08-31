@@ -14,6 +14,15 @@ import { LatheGeometry, Vector2 } from "three";
 /** Sides around the revolution. Enough to look round, few enough to be cheap. */
 const SEGMENTS = 48;
 
+/**
+ * How far the base of a piece sits above the bench.
+ *
+ * A fraction of a millimetre at real scale, and invisible, but without it the
+ * glass floor and the bench top are the same plane and the depth buffer cannot
+ * decide which is in front. That is what makes a base flicker.
+ */
+const LIFT = 0.005;
+
 function lathe(points: [number, number][]): LatheGeometry {
   const geometry = new LatheGeometry(
     points.map(([radius, height]) => new Vector2(radius, height)),
@@ -38,16 +47,16 @@ export function createBeakerGeometry(
   const lip = outerRadius * 1.02;
 
   return lathe([
-    [0, 0],
-    [outerRadius * 0.94, 0],
-    [outerRadius, height * 0.02],
+    [0, LIFT],
+    [outerRadius * 0.94, LIFT],
+    [outerRadius, LIFT + height * 0.02],
     [outerRadius, height * 0.965],
     [lip, height * 0.99],
     [lip * 0.995, height],
     [lip - wall, height * 0.995],
     [outerRadius - wall, height * 0.96],
-    [outerRadius - wall, floor],
-    [0, floor],
+    [outerRadius - wall, LIFT + floor],
+    [0, LIFT + floor],
   ]);
 }
 
@@ -67,9 +76,9 @@ export function createCylinderGeometry(
   const floor = footHeight + height * 0.02;
 
   return lathe([
-    [0, 0],
-    [footRadius, 0],
-    [footRadius, footHeight * 0.55],
+    [0, LIFT],
+    [footRadius, LIFT],
+    [footRadius, LIFT + footHeight * 0.55],
     [footRadius * 0.92, footHeight],
     [outerRadius * 1.05, footHeight * 1.9],
     [outerRadius, footHeight * 2.6],
@@ -77,7 +86,7 @@ export function createCylinderGeometry(
     [outerRadius * 1.06, height * 0.99],
     [outerRadius * 1.05, height],
     [outerRadius - wall, height * 0.99],
-    [outerRadius - wall, floor],
-    [0, floor],
+    [outerRadius - wall, LIFT + floor],
+    [0, LIFT + floor],
   ]);
 }

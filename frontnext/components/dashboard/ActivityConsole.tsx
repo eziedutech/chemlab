@@ -42,7 +42,7 @@ export function ActivityConsole() {
   const latest = activity[activity.length - 1];
 
   return (
-    <div className="glass-panel pointer-events-auto w-[min(26rem,calc(100vw-1.5rem))] overflow-hidden">
+    <div className="glass-panel pointer-events-auto w-full overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}

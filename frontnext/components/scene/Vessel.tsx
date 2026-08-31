@@ -115,7 +115,11 @@ export function Vessel({ job, slotIndex, total, kind, orderIndex }: VesselProps)
         minorEveryMl: 10,
         majorEveryMl: 50,
         surfaceHeight: cylinderSurfaceHeight,
-        fontPx: 22,
+        /* Larger than it looks on the canvas. A cylinder this narrow wraps
+           1024 pixels of texture around a couple of centimetres of glass, so
+           type sized for the beaker comes out as a smudge here. The point of a
+           measuring cylinder is that you can read the volume off it. */
+        fontPx: 46,
       }),
     [],
   );
@@ -284,7 +288,7 @@ export function Vessel({ job, slotIndex, total, kind, orderIndex }: VesselProps)
               <mesh geometry={glass}>
                 <LabGlass refracting={refracting} />
               </mesh>
-
+        
               {/* Printed volume scale. */}
               {scale && (
                 <mesh position={[0, CYLINDER_HEIGHT / 2, 0]} rotation={[0, -0.3, 0]}>

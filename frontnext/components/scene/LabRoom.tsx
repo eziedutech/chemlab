@@ -6,6 +6,7 @@ import {
   createBeakerGeometry,
   createCylinderGeometry,
 } from "../../lib/scene/glassProfiles";
+import { createTileTexture } from "../../lib/scene/tileTexture";
 
 /**
  * The room the experiment stands in.
@@ -33,6 +34,9 @@ const ROOM_HEIGHT = 3.4;
 const COUNTER_X = 3.6;
 export const COUNTER_HEIGHT = 0.92;
 const COUNTER_DEPTH = 0.85;
+/** The island bench in the middle, where the experiment stands. */
+const ISLAND_WIDTH = 0.82;
+const ISLAND_DEPTH = 1.45;
 
 /** Bottles and flasks standing on the shelves, as one instanced mesh each. */
 const BOTTLE_COUNT = 48;
@@ -69,6 +73,81 @@ function shelfPlacements(count: number, levels: number[], jitter: number): Place
   return placements;
 }
 
+/**
+ * The cupboards and drawers along the front of a side counter.
+ *
+ * Without them the counter is a long grey slab, which is what a placeholder
+ * looks like. A teaching bench is a run of identical units, each a drawer over
+ * a pair of doors, and repeating that is enough to say "storage" from across
+ * the room. Everything is a box proud of the carcass by a few millimetres, so
+ * the whole run costs a handful of draw calls and no textures at all.
+ */
+function CabinetRun({ side, x }: { side: -1 | 1; x: number }) {
+  const runLength = ROOM_DEPTH - 1.8;
+  const unitWidth = 1.1;
+  const units = Math.floor(runLength / unitWidth);
+  const startZ = -(units * unitWidth) / 2 + unitWidth / 2;
+
+  // The face that looks onto the aisle, which is the one towards the middle of
+  // the room. Panels stand a little proud of it, handles a little proud again.
+  const faceX = x - side * ((COUNTER_DEPTH * 1.25) / 2);
+  const panelX = faceX - side * 0.012;
+  const handleX = faceX - side * 0.032;
+
+  const carcass = COUNTER_HEIGHT - 0.1;
+  const drawerHeight = 0.2;
+  const doorHeight = carcass - drawerHeight - 0.09;
+  const drawerY = carcass - drawerHeight / 2 - 0.03;
+  const doorY = 0.05 + doorHeight / 2;
+
+  return (
+    <group>
+      {Array.from({ length: units }, (_, index) => {
+        const z = startZ + index * unitWidth;
+        return (
+          <group key={z} position={[0, 0, z]}>
+            {/* Drawer front, with its pull. */}
+            <mesh position={[panelX, drawerY, 0]}>
+              <boxGeometry args={[0.024, drawerHeight, unitWidth - 0.06]} />
+              <meshStandardMaterial color="#6d7784" roughness={0.72} metalness={0.1} />
+            </mesh>
+            <mesh position={[handleX, drawerY, 0]} rotation={[Math.PI / 2, 0, 0]}>
+              <cylinderGeometry args={[0.011, 0.011, unitWidth * 0.42, 8]} />
+              <meshStandardMaterial color="#aeb8c4" roughness={0.35} metalness={0.75} />
+            </mesh>
+
+            {/* Two doors below it, with a shadow gap between them. */}
+            {[-1, 1].map((half) => (
+              <mesh
+                key={half}
+                position={[panelX, doorY, (half * (unitWidth - 0.06)) / 4]}
+              >
+                <boxGeometry args={[0.024, doorHeight, unitWidth / 2 - 0.05]} />
+                <meshStandardMaterial color="#6d7784" roughness={0.72} metalness={0.1} />
+              </mesh>
+            ))}
+            {[-1, 1].map((half) => (
+              <mesh
+                key={half}
+                position={[handleX, doorY + doorHeight / 2 - 0.09, half * 0.045]}
+              >
+                <cylinderGeometry args={[0.009, 0.009, 0.11, 8]} />
+                <meshStandardMaterial color="#aeb8c4" roughness={0.35} metalness={0.75} />
+              </mesh>
+            ))}
+          </group>
+        );
+      })}
+
+      {/* A plinth, set back, so the run does not sit flat on the floor. */}
+      <mesh position={[x, 0.025, 0]}>
+        <boxGeometry args={[COUNTER_DEPTH * 1.1, 0.05, runLength]} />
+        <meshStandardMaterial color="#4a535f" roughness={0.85} metalness={0.05} />
+      </mesh>
+    </group>
+  );
+}
+
 function Shelving({ side }: { side: -1 | 1 }) {
   const x = side * (COUNTER_X + 0.2);
 
@@ -77,12 +156,18 @@ function Shelving({ side }: { side: -1 | 1 }) {
       {/* Counter top and the cabinets under it. */}
       <mesh position={[x, COUNTER_HEIGHT, 0]}>
         <boxGeometry args={[COUNTER_DEPTH * 1.6, 0.07, ROOM_DEPTH - 1.6]} />
-        <meshStandardMaterial color="#3b4757" roughness={0.5} metalness={0.18} />
+        <meshStandardMaterial
+          color="#3b4757"
+          roughness={0.55}
+          metalness={0.1}
+          envMapIntensity={0.85}
+        />
       </mesh>
       <mesh position={[x + side * 0.12, COUNTER_HEIGHT / 2, 0]}>
         <boxGeometry args={[COUNTER_DEPTH * 1.25, COUNTER_HEIGHT - 0.1, ROOM_DEPTH - 1.8]} />
         <meshStandardMaterial color="#7e8896" roughness={0.75} metalness={0.08} />
       </mesh>
+      <CabinetRun side={side} x={x + side * 0.12} />
 
       {/* Two glass shelves above the counter, on thin uprights. */}
       {[1.72, 2.24].map((y) => (
@@ -201,39 +286,57 @@ function Glassware() {
   );
 }
 
+/** Side of one floor tile, in metres. */
+const TILE_SIZE = 0.6;
+
 export function LabRoom() {
+  const tiles = useMemo(() => {
+    const texture = createTileTexture();
+    if (texture) {
+      texture.repeat.set(ROOM_WIDTH / TILE_SIZE, ROOM_DEPTH / TILE_SIZE);
+    }
+    return texture;
+  }, []);
+
+  useEffect(() => () => tiles?.dispose(), [tiles]);
+
   return (
     <group>
-      {/* Floor. */}
+      {/* Floor, tiled so it reads as a floor rather than as more benchtop. */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.001, 0]}>
         <planeGeometry args={[ROOM_WIDTH, ROOM_DEPTH]} />
-        <meshStandardMaterial color="#6b737d" roughness={0.72} metalness={0.05} />
+        <meshStandardMaterial
+          map={tiles ?? undefined}
+          color={tiles ? "#ffffff" : "#6b737d"}
+          roughness={0.72}
+          metalness={0.05}
+        />
       </mesh>
 
       {/* Walls. The camera sits inside, so only three are ever seen. */}
       <mesh position={[0, ROOM_HEIGHT / 2, -ROOM_DEPTH / 2]}>
         <planeGeometry args={[ROOM_WIDTH, ROOM_HEIGHT]} />
-        <meshStandardMaterial color="#aeb7c2" roughness={0.9} />
+        <meshStandardMaterial color="#dde4ec" roughness={0.9} />
       </mesh>
       <mesh
         position={[-ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]}
         rotation={[0, Math.PI / 2, 0]}
       >
         <planeGeometry args={[ROOM_DEPTH, ROOM_HEIGHT]} />
-        <meshStandardMaterial color="#a7b0bb" roughness={0.9} />
+        <meshStandardMaterial color="#d6dde6" roughness={0.9} />
       </mesh>
       <mesh
         position={[ROOM_WIDTH / 2, ROOM_HEIGHT / 2, 0]}
         rotation={[0, -Math.PI / 2, 0]}
       >
         <planeGeometry args={[ROOM_DEPTH, ROOM_HEIGHT]} />
-        <meshStandardMaterial color="#a7b0bb" roughness={0.9} />
+        <meshStandardMaterial color="#d6dde6" roughness={0.9} />
       </mesh>
 
       {/* Ceiling, with recessed strip lights running down its length. */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, ROOM_HEIGHT, 0]}>
         <planeGeometry args={[ROOM_WIDTH, ROOM_DEPTH]} />
-        <meshStandardMaterial color="#c6cdd6" roughness={0.95} />
+        <meshStandardMaterial color="#e4e9f0" roughness={0.95} />
       </mesh>
       {[-2.4, 2.6].map((z) => (
         <group key={z}>
@@ -277,14 +380,77 @@ export function LabRoom() {
       <Shelving side={1} />
       <Glassware />
 
+      {/* Task light over the island bench.
+          Glass is legible because of what it reflects and what shines through
+          it, so a bright source directly above the apparatus does more for it
+          than any material setting: it draws the highlight along the rim and
+          lights the liquid from above. Lab benches carry one for the same
+          practical reason. */}
+      <group position={[0, 1.95, 0]}>
+        <mesh>
+          <boxGeometry args={[0.72, 0.05, 0.26]} />
+          <meshStandardMaterial color="#b9c3ce" roughness={0.4} metalness={0.5} />
+        </mesh>
+        <mesh position={[0, -0.028, 0]}>
+          <boxGeometry args={[0.66, 0.012, 0.2]} />
+          <meshStandardMaterial
+            color="#ffffff"
+            emissive="#f2f8ff"
+            emissiveIntensity={2.4}
+            roughness={0.3}
+          />
+        </mesh>
+        {/* Two thin suspension rods up to the ceiling. */}
+        {[-0.26, 0.26].map((x) => (
+          <mesh key={x} position={[x, (ROOM_HEIGHT - 1.95) / 2, 0]}>
+            <cylinderGeometry args={[0.006, 0.006, ROOM_HEIGHT - 1.95, 6]} />
+            <meshStandardMaterial color="#8e99a8" roughness={0.5} metalness={0.6} />
+          </mesh>
+        ))}
+        {/* Three weak lights along the fitting rather than one strong one.
+            A single point source lands on the bench as a hot spot; spreading
+            it out is what a diffuser does. */}
+        {[-0.22, 0, 0.22].map((x) => (
+          <pointLight
+            key={x}
+            position={[x, -0.12, 0]}
+            intensity={0.42}
+            color="#f4faff"
+          />
+        ))}
+      </group>
+
       {/* The island bench the experiment stands on. Its top is the plane
-          everything else in the scene is measured from. */}
+          everything else in the scene is measured from.
+
+          Narrower than it was. At the old size it read as a loading dock: the
+          glassware sat in the middle of an expanse of dark top with the wall
+          run pushed off to one side, and the room looked lopsided. Bringing
+          the edges in leaves an aisle on both sides and lets the two wall runs
+          balance each other. */}
       <mesh position={[0, COUNTER_HEIGHT - 0.035, 0]}>
-        <boxGeometry args={[1.1, 0.07, 1.9]} />
-        <meshStandardMaterial color="#3b4757" roughness={0.5} metalness={0.18} />
+        <boxGeometry args={[ISLAND_WIDTH, 0.07, ISLAND_DEPTH]} />
+        <meshStandardMaterial color="#171d25" roughness={0.7} metalness={0.06} />
       </mesh>
+      {/* The working surface itself, and it is not a mirror.
+
+          It was one, softly, and the reflection kept putting a second upside
+          down copy of the glassware under the real thing. A school bench is
+          sealed epoxy resin: dark, matte, and it shows you nothing. Take the
+          reflection away and the glass has a plain dark ground to sit against,
+          which is what makes a clear vessel legible in the first place. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, COUNTER_HEIGHT + 0.0008, 0]}>
+        <planeGeometry args={[ISLAND_WIDTH, ISLAND_DEPTH]} />
+        <meshStandardMaterial
+          color="#1b222b"
+          roughness={0.94}
+          metalness={0}
+          envMapIntensity={0.25}
+        />
+      </mesh>
+
       <mesh position={[0, (COUNTER_HEIGHT - 0.07) / 2, 0]}>
-        <boxGeometry args={[0.92, COUNTER_HEIGHT - 0.07, 1.7]} />
+        <boxGeometry args={[ISLAND_WIDTH - 0.18, COUNTER_HEIGHT - 0.07, ISLAND_DEPTH - 0.2]} />
         <meshStandardMaterial color="#7e8896" roughness={0.75} metalness={0.08} />
       </mesh>
     </group>
