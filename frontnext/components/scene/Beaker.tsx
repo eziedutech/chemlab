@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { MeshTransmissionMaterial } from "@react-three/drei";
 import { CanvasTexture, DoubleSide } from "three";
 import {
   BASE_HEIGHT,
@@ -46,9 +47,33 @@ function useGraduationTexture(): CanvasTexture | null {
  * Transmission renders the scene a second time per frame, which is exactly the
  * cost a school laptop cannot absorb, and at this scale it buys very little.
  */
+/**
+ * Whether this device gets refracting glass.
+ *
+ * Transmission renders the scene into a buffer every frame, which is the one
+ * effect a phone really feels, so it is reserved for a screen wide enough to
+ * suggest a laptop. Everything else gets the cheaper transparent glass, which
+ * is the same shape, just flatter.
+ */
+function useRefractingGlass(): boolean {
+  const [allowed, setAllowed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const query = window.matchMedia("(min-width: 1024px)");
+    const update = () => setAllowed(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  return allowed;
+}
+
 export function Beaker() {
   const graduations = useGraduationTexture();
   const piece = useGlasswarePiece(GLASSWARE_NODES.beaker);
+  const refracting = useRefractingGlass();
 
   return (
     <group>
@@ -57,17 +82,40 @@ export function Beaker() {
           loads, and the primitive stands in when it does not. */}
       {piece ? (
         <mesh geometry={piece.mesh.geometry} scale={WALL_HEIGHT / piece.height}>
-          <meshPhysicalMaterial
-            color="#dceaf5"
-            transparent
-            opacity={0.28}
-            roughness={0.04}
-            metalness={0}
-            ior={1.5}
-            reflectivity={0.55}
-            envMapIntensity={1.6}
-            side={DoubleSide}
-          />
+          {refracting ? (
+            /* Real refraction: what makes glass read as glass rather than as a
+               transparent shell. Kept to a small buffer and two samples, since
+               it costs an extra pass every frame. */
+            <MeshTransmissionMaterial
+              samples={2}
+              resolution={256}
+              transmission={1}
+              thickness={0.22}
+              roughness={0.08}
+              ior={1.5}
+              chromaticAberration={0.035}
+              anisotropy={0.1}
+              distortion={0.05}
+              distortionScale={0.2}
+              temporalDistortion={0}
+              color="#eef6ff"
+              attenuationColor="#dbeaf6"
+              attenuationDistance={2.4}
+              side={DoubleSide}
+            />
+          ) : (
+            <meshPhysicalMaterial
+              color="#dceaf5"
+              transparent
+              opacity={0.28}
+              roughness={0.04}
+              metalness={0}
+              ior={1.5}
+              reflectivity={0.55}
+              envMapIntensity={1.6}
+              side={DoubleSide}
+            />
+          )}
         </mesh>
       ) : (
         <mesh position={[0, WALL_HEIGHT / 2, 0]}>

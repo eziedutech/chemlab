@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import { InstancedMesh, Object3D } from "three";
+import { BufferGeometry, InstancedMesh, Object3D } from "three";
+import { GLASSWARE_NODES, useGlasswarePiece } from "../../lib/scene/glassware";
 
 /**
  * The room the experiment stands in.
@@ -111,6 +112,13 @@ function Glassware() {
   const flasks = useRef<InstancedMesh>(null);
   const dummy = useMemo(() => new Object3D(), []);
 
+  // The same imported glassware as the bench, standing on the shelves. It is
+  // metres away and never touched, so it gets a cheap material and no
+  // transmission.
+  const beaker = useGlasswarePiece(GLASSWARE_NODES.beakerSmall);
+  const erlenmeyer = useGlasswarePiece(GLASSWARE_NODES.erlenmeyer);
+  const cylinder = useGlasswarePiece(GLASSWARE_NODES.cylinderShort);
+
   const bottlePlacements = useMemo(
     () => shelfPlacements(BOTTLE_COUNT, [1.79, 2.31, COUNTER_HEIGHT + 0.13], 0.24),
     [],
@@ -120,14 +128,19 @@ function Glassware() {
     [],
   );
 
+  /** The model is drawn in centimetres; the room is in metres. */
+  const MODEL_TO_METRES = 0.01;
+
   useMemo(() => {
-    // Written once on mount: the shelves never move, so there is no reason for
-    // this to touch the frame loop.
-    const apply = (mesh: InstancedMesh | null, placements: Placement[]) => {
+    const apply = (
+      mesh: InstancedMesh | null,
+      placements: Placement[],
+      scale: number,
+    ) => {
       if (!mesh) return;
       placements.forEach((placement, index) => {
         dummy.position.set(...placement.position);
-        dummy.scale.setScalar(placement.scale);
+        dummy.scale.setScalar(placement.scale * scale);
         dummy.rotation.set(0, placement.rotation, 0);
         dummy.updateMatrix();
         mesh.setMatrixAt(index, dummy.matrix);
@@ -137,32 +150,45 @@ function Glassware() {
 
     // Refs are populated by the time this runs on the client render pass.
     queueMicrotask(() => {
-      apply(bottles.current, bottlePlacements);
-      apply(flasks.current, flaskPlacements);
+      apply(bottles.current, bottlePlacements, beaker ? MODEL_TO_METRES : 1);
+      apply(flasks.current, flaskPlacements, erlenmeyer ? MODEL_TO_METRES : 1);
     });
-  }, [bottlePlacements, flaskPlacements, dummy]);
+  }, [bottlePlacements, flaskPlacements, dummy, beaker, erlenmeyer]);
+
+  const shelfMaterial = (
+    <meshPhysicalMaterial
+      color="#dceaf5"
+      transparent
+      opacity={0.38}
+      roughness={0.08}
+      metalness={0}
+      ior={1.5}
+      envMapIntensity={1.4}
+    />
+  );
 
   return (
     <group>
       <instancedMesh
         ref={bottles}
-        args={[undefined, undefined, BOTTLE_COUNT]}
+        args={[
+          (beaker?.mesh.geometry ?? cylinder?.mesh.geometry) as BufferGeometry | undefined,
+          undefined,
+          BOTTLE_COUNT,
+        ]}
         frustumCulled={false}
       >
-        <cylinderGeometry args={[0.055, 0.06, 0.2, 8]} />
-        {/* Standard rather than physical: these are set dressing metres away,
-            and a physical transparent material on a hundred instances is the
-            kind of cost a school laptop notices. */}
-        <meshStandardMaterial color="#dbe9f6" roughness={0.25} metalness={0.05} />
+        {!beaker && !cylinder && <cylinderGeometry args={[0.055, 0.06, 0.2, 8]} />}
+        {shelfMaterial}
       </instancedMesh>
 
       <instancedMesh
         ref={flasks}
-        args={[undefined, undefined, FLASK_COUNT]}
+        args={[erlenmeyer?.mesh.geometry as BufferGeometry | undefined, undefined, FLASK_COUNT]}
         frustumCulled={false}
       >
-        <coneGeometry args={[0.085, 0.2, 10]} />
-        <meshStandardMaterial color="#d3e5f4" roughness={0.25} metalness={0.05} />
+        {!erlenmeyer && <coneGeometry args={[0.085, 0.2, 10]} />}
+        {shelfMaterial}
       </instancedMesh>
     </group>
   );

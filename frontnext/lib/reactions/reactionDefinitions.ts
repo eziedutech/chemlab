@@ -13,6 +13,8 @@ export type TemperatureDirection = "endoterm" | "eksoterm" | "netral";
 export interface SubstanceDefinition {
   /** Colour the substance shows while it is being poured. */
   color: string;
+  /** Chemical formula, or an empty string where there is not one. */
+  formula: string;
   /**
    * Whether the scene pours this from a bottle or lowers it in as an object.
    * An egg does not come out of a reagent bottle.
@@ -44,6 +46,7 @@ export interface ReactionDefinition {
 export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   air: {
     color: "#cfe0ee",
+    formula: "H₂O",
     kind: "liquid",
     labelId: "Air",
     labelEn: "Water",
@@ -51,6 +54,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   },
   air_suling: {
     color: "#e2eef7",
+    formula: "H₂O",
     kind: "liquid",
     labelId: "Air suling",
     labelEn: "Distilled water",
@@ -58,6 +62,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   },
   air_garam: {
     color: "#c3d9ea",
+    formula: "NaCl (aq)",
     kind: "liquid",
     labelId: "Air garam",
     labelEn: "Salt water",
@@ -65,6 +70,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   },
   cuka: {
     color: "#f0e4bf",
+    formula: "CH₃COOH",
     kind: "liquid",
     labelId: "Cuka",
     labelEn: "Vinegar",
@@ -72,6 +78,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   },
   baking_soda: {
     color: "#f3f6f9",
+    formula: "NaHCO₃",
     kind: "powder",
     labelId: "Baking soda",
     labelEn: "Baking soda",
@@ -85,6 +92,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   },
   garam: {
     color: "#f2f5f8",
+    formula: "NaCl",
     kind: "powder",
     labelId: "Garam",
     labelEn: "Salt",
@@ -92,6 +100,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   },
   gula: {
     color: "#f6f1e4",
+    formula: "C₁₂H₂₂O₁₁",
     kind: "powder",
     labelId: "Gula",
     labelEn: "Sugar",
@@ -99,6 +108,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   },
   lakmus: {
     color: "#b9a7d8",
+    formula: "",
     kind: "powder",
     labelId: "Lakmus",
     labelEn: "Litmus",
@@ -106,6 +116,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   },
   pp: {
     color: "#f4f0f7",
+    formula: "C₂₀H₁₄O₄",
     kind: "liquid",
     labelId: "Indikator PP",
     labelEn: "Phenolphthalein",
@@ -113,6 +124,7 @@ export const SUBSTANCES: Record<string, SubstanceDefinition> = {
   },
   telur: {
     color: "#f0e2cc",
+    formula: "",
     kind: "object",
     labelId: "Telur",
     labelEn: "Egg",
@@ -362,9 +374,25 @@ export function findReaction(
 
 /** Pairs that do work in this topic, for the failure message. */
 export function availablePairs(topic: Topic): string[] {
+  return pairsFor(topic).map(([a, b]) => `${a} + ${b}`);
+}
+
+/** The same pairs, as the two canonical substance names. */
+export function pairsFor(topic: Topic): [string, string][] {
   return Object.entries(REACTIONS)
     .filter(([key]) => key.startsWith(`${topic}:`))
-    .map(([key]) => key.slice(topic.length + 1).replace("+", " + "));
+    .map(([key]) => key.slice(topic.length + 1).split("+") as [string, string]);
+}
+
+/** Substance name in the reader's language, falling back to the key. */
+export function substanceLabel(name: string, lang: "id" | "en"): string {
+  const definition = SUBSTANCES[name];
+  if (!definition) return name;
+  return lang === "id" ? definition.labelId : definition.labelEn;
+}
+
+export function substanceFormula(name: string): string {
+  return SUBSTANCES[name]?.formula ?? "";
 }
 
 export function substanceKind(name: string): SubstanceDefinition["kind"] {

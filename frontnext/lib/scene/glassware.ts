@@ -18,7 +18,10 @@ const MODEL_URL = "/models/glassware.glb";
 
 export const GLASSWARE_NODES = {
   beaker: "lab_beaker_a",
+  beakerSmall: "lab_beaker_b",
   cylinder: "lab_cylinder_a",
+  cylinderShort: "lab_cylinder_c",
+  erlenmeyer: "lab_erlenmeyer_a",
 } as const;
 
 export interface GlasswarePiece {

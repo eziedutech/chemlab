@@ -92,9 +92,9 @@ const STRINGS = {
     id: "Simulator lab kimia dan fisika 3D untuk siswa SMP dan SMA. AI agent berperan sebagai instruktur: dia mengganti topik, menakar bahan, mencampurnya, menjelaskan tahap reaksi, dan menyusun laporan pengamatan. Semua hasil reaksi berasal dari tabel statis, bukan dari model bahasa, supaya sainsnya tidak berhalusinasi.",
     en: "A 3D chemistry and physics lab for secondary school students. An AI agent acts as the instructor: it switches topics, measures reagents, mixes them, explains each step of the reaction, and writes the observation report. Reaction outcomes come from a static table rather than a language model, so the science cannot be hallucinated.",
   },
-  aboutJudges: {
-    id: "Untuk juri: buka halaman ini di in-app browser ChatGPT, atau Chrome 149+ dengan chrome://flags/#enable-webmcp-testing. Tanpa dukungan WebMCP, pindah ke mode Manual dan jalankan tool langsung dari panel kanan.",
-    en: "For judges: open this page in the ChatGPT in-app browser, or Chrome 149+ with chrome://flags/#enable-webmcp-testing. Without WebMCP support, switch to Manual mode and run the tools straight from the right panel.",
+  aboutHow: {
+    id: "Agent memanggil tool lewat WebMCP di browser yang mendukungnya. Kalau browsernya belum, mode Manual di panel atas menjalankan tool yang sama langsung dari halaman ini.",
+    en: "The agent calls the tools through WebMCP where the browser supports it. Where it does not, Manual mode in the top bar runs the same tools straight from this page.",
   },
   commandsBody: {
     id: "Contoh berikut menjalankan seluruh demo, tapi bukan mantra. Agent memahami maksud, jadi ucapkan dengan kalimatmu sendiri dan dengan urutan yang kamu mau.",
@@ -105,8 +105,16 @@ const STRINGS = {
     en: "Three locked topics, with the substances available in each.",
   },
   creditsBody: {
-    id: "Seluruh model 3D di halaman ini dibuat dari primitif geometris di dalam kode. Tidak ada aset pihak ketiga. Dirilis di bawah lisensi MIT.",
-    en: "Every 3D model on this page is built from geometric primitives in code. There are no third party assets. Released under the MIT licence.",
+    id: "Ruangan, meja, cairan, gelembung, elektroda, lampu, spatula, dan telur dibangun dari primitif geometris di dalam kode. Aplikasi ini dirilis di bawah lisensi MIT.",
+    en: "The room, the benches, the liquid, the bubbles, the electrodes, the lamp, the spatula and the egg are built from geometric primitives in code. The application is released under the MIT licence.",
+  },
+  creditsAsset: {
+    id: "Mesh gelas kimia dan gelas ukur berasal dari \"Chemistry Glassware\" oleh maxdragonn, dipakai di bawah lisensi CC BY 4.0, dengan label merek dihapus dan material diganti.",
+    en: "The beaker and measuring cylinder meshes come from \"Chemistry Glassware\" by maxdragonn, used under CC BY 4.0, with the branding removed and the materials replaced.",
+  },
+  toolsDisplayNote: {
+    id: "Deskripsi yang dibaca agent ditulis dalam Bahasa Inggris. Di bawah ini ringkasannya.",
+    en: "The descriptions the agent reads are written in English. These are summaries.",
   },
   labState: { id: "Keadaan lab", en: "Lab state" },
   topic: { id: "Topik", en: "Topic" },
@@ -117,6 +125,38 @@ const STRINGS = {
 } as const;
 
 export type StringKey = keyof typeof STRINGS;
+
+/** What each tool does, for a reader rather than for the agent. */
+export const TOOL_SUMMARY: Record<string, { id: string; en: string }> = {
+  switch_experiment_mode: {
+    id: "Mengganti mata pelajaran dan topik. Alat di atas meja ikut berganti.",
+    en: "Switches the subject and topic. The apparatus on the bench changes with it.",
+  },
+  mix_substances: {
+    id: "Menakar tiap bahan di meja, lalu memasukkannya ke gelas kimia satu per satu.",
+    en: "Measures each reagent out on the bench, then adds them to the beaker one at a time.",
+  },
+  explain_reaction_step: {
+    id: "Menjelaskan satu tahap reaksi, dari tahap 1 sampai 4.",
+    en: "Explains one step of the reaction, from step 1 to step 4.",
+  },
+  render_lab_report: {
+    id: "Menyusun laporan pengamatan dari apa yang terjadi di sesi ini.",
+    en: "Writes the observation report from what happened in this session.",
+  },
+  trigger_safety_alert: {
+    id: "Menampilkan catatan keselamatan sebagai bagian dari pelajaran.",
+    en: "Shows a safety note as part of the lesson.",
+  },
+  get_lab_state: {
+    id: "Membaca keadaan lab sekarang sebelum memutuskan langkah berikutnya.",
+    en: "Reads the current state of the lab before deciding what to do next.",
+  },
+  reset_experiment: {
+    id: "Mengosongkan gelas dan mengulang topik dari awal.",
+    en: "Empties the beaker and starts the topic over.",
+  },
+};
 
 export function t(
   lang: UiLang,

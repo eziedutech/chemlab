@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { STARTER_PROMPT, t, type StringKey } from "../../lib/i18n";
+import { STARTER_PROMPT, t, TOOL_SUMMARY, type StringKey } from "../../lib/i18n";
 import {
-  SUBSTANCES,
   TOPIC_SUBSTANCES,
-  availablePairs,
+  pairsFor,
+  substanceFormula,
+  substanceLabel,
 } from "../../lib/reactions/reactionDefinitions";
 import { toolDescriptors } from "../../lib/webmcp/registerTools";
 import { useLabStore, type Topic } from "../../store/labStore";
-import { BackendStatus } from "./BackendStatus";
 import { GlassModal } from "./GlassModal";
 import { StarterPromptButton } from "./StarterPromptButton";
 
@@ -115,13 +115,7 @@ export function IconRail() {
           {open === "info" && (
             <div className="space-y-4 text-sm leading-relaxed text-slate-300">
               <p>{t(uiLang, "aboutBody")}</p>
-              <p className="text-slate-400">{t(uiLang, "aboutJudges")}</p>
-              <div className="border-t border-white/[0.07] pt-4 text-xs">
-                <span className="text-slate-400">{t(uiLang, "backendHealth")}</span>
-                <div className="mt-1">
-                  <BackendStatus />
-                </div>
-              </div>
+              <p className="text-slate-400">{t(uiLang, "aboutHow")}</p>
             </div>
           )}
 
@@ -138,6 +132,10 @@ export function IconRail() {
           )}
 
           {open === "tools" && (
+            <>
+            <p className="mb-3 text-xs leading-relaxed text-slate-400">
+              {t(uiLang, "toolsDisplayNote")}
+            </p>
             <ol className="divide-y divide-white/[0.07] text-sm">
               {toolDescriptors.map((tool, index) => (
                 <li key={tool.name} className="flex gap-4 py-3 first:pt-0 last:pb-0">
@@ -149,12 +147,13 @@ export function IconRail() {
                       {tool.name}
                     </span>
                     <p className="mt-1 leading-relaxed text-slate-400">
-                      {tool.description}
+                      {TOOL_SUMMARY[tool.name]?.[uiLang] ?? tool.description}
                     </p>
                   </div>
                 </li>
               ))}
             </ol>
+            </>
           )}
 
           {open === "topics" && (
@@ -166,18 +165,23 @@ export function IconRail() {
                     {TOPIC_LABELS[topic][uiLang]}
                     <span className="ml-2 font-mono text-xs text-slate-400">{topic}</span>
                   </h3>
-                  <p className="mt-1.5 text-slate-400">
-                    {TOPIC_SUBSTANCES[topic]
-                      .map((name) =>
-                        uiLang === "id"
-                          ? SUBSTANCES[name]?.labelId ?? name
-                          : SUBSTANCES[name]?.labelEn ?? name,
-                      )
-                      .join(", ")}
-                  </p>
-                  <ul className="mt-2 space-y-1 font-mono text-xs text-slate-400">
-                    {availablePairs(topic).map((pair) => (
-                      <li key={pair}>{pair}</li>
+                  <ul className="mt-2 space-y-1 text-slate-300">
+                    {TOPIC_SUBSTANCES[topic].map((name) => (
+                      <li key={name} className="flex items-baseline gap-2">
+                        <span>{substanceLabel(name, uiLang)}</span>
+                        {substanceFormula(name) && (
+                          <span className="font-mono text-xs text-lab-accent">
+                            {substanceFormula(name)}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                  <ul className="mt-3 space-y-1 text-xs text-slate-400">
+                    {pairsFor(topic).map(([a, b]) => (
+                      <li key={`${a}+${b}`}>
+                        {substanceLabel(a, uiLang)} + {substanceLabel(b, uiLang)}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -188,9 +192,7 @@ export function IconRail() {
           {open === "credits" && (
             <div className="space-y-3 text-sm leading-relaxed text-slate-300">
               <p>{t(uiLang, "creditsBody")}</p>
-              <p className="text-slate-400">
-                Next.js, React Three Fiber, drei, Zustand, axum, tokio.
-              </p>
+              <p className="text-slate-400">{t(uiLang, "creditsAsset")}</p>
             </div>
           )}
         </GlassModal>
