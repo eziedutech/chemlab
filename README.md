@@ -9,7 +9,7 @@
 ## Table of Contents
 
 - [What it is](#what-it-is)
-- [For judges: how to test](#for-judges-how-to-test)
+- [How to test](#how-to-test)
 - [WebMCP tools](#webmcp-tools)
 - [Architecture](#architecture)
 - [Running locally](#running-locally)
@@ -36,35 +36,38 @@ substances, reads the current state of the beaker, raises educational safety
 alerts, explains each reaction step, and writes the lab report at the end. The
 student talks to the agent, and the simulation responds.
 
-## For judges: how to test
+## How to test
 
-Live URL: **https://chemlab.eziedutech.dev/?lang=en**
+Live URL: **https://chemlab.eziedutech.dev**
 
-No account and no login are required, and the app is free to use. The `lang=en`
-parameter opens the interface in English; without it the page opens in
-Indonesian, which is the classroom default, and the toggle in the header
+No account and no login are required, and the app is free to use. The page opens
+in English. `?lang=id` opens it in Indonesian, and the toggle in the header
 switches at any time.
 
 1. Open the live URL in the ChatGPT desktop app in-app browser, which supports
    WebMCP by default. As an alternative, use Chrome 149 or newer with
    `chrome://flags/#enable-webmcp-testing` enabled, then restart the browser.
-2. Confirm the WebMCP status badge in the app reads as detected, with a tool
+2. Confirm the WebMCP status badge in the header reads as detected, with a tool
    count of seven.
-3. Ask the agent to list its available tools, then paste the starter prompt from
-   the app's "Copy starter prompt" button. The prompt is also printed on the
-   page, so it can be selected by hand if the clipboard is blocked.
-4. Watch the 3D scene: every agent tool call raises a visible toast naming the
-   tool that ran. A call started from the manual runner instead of an agent
-   says "run by hand", so the two are never confused.
+3. Ask the agent to list its available tools. Then open the second icon in the
+   left rail for a starter prompt covering the whole demo, either with its copy
+   button or by selecting the text.
+4. Watch the 3D scene. Every tool call is written to the activity console in the
+   right column, with the tool name, the outcome, and whether the call came from
+   an agent or was run by hand, so the two are never confused.
 
-If the browser has no WebMCP support at all, the page still works: the badge
-says so, and the manual tool runner near the bottom executes the same tool
-descriptors, with the same structured results.
+The same instructions are in the app itself, behind the first icon in the left
+rail.
+
+If the browser has no WebMCP support, the page still works. The badge says so,
+and switching the header to Manual gives a runner that executes the same tool
+descriptors and shows the same structured results. The topic buttons in the
+header call `switch_experiment_mode` the same way an agent does, so the three
+experiments can be seen without any agent at all.
 
 ## WebMCP tools
 
-Seven tools are registered on the page. The table is filled in as each tool
-lands.
+Seven tools are registered on the page.
 
 | Tool | What it does | Returns |
 |---|---|---|
@@ -160,7 +163,9 @@ The frontend is then served at `http://localhost:3000` and the backend at
 curl http://localhost:8080/health
 ```
 
-which returns `{"status":"ok","version":"0.1.0"}`.
+which returns `{"status":"ok","version":"0.1.0","providers":N}`, where `N` is
+how many LLM providers are configured. Zero is a working state: lab reports are
+then assembled from the student's own observations instead.
 
 Without Docker, in two terminals:
 
@@ -278,9 +283,11 @@ Topics are mapped to the Indonesian Kurikulum Merdeka by phase.
 ## Credits and licenses
 
 There are no third party assets. Every piece of geometry on the page is built
-in code: the room and its benches and shelving, the glassware, which is turned
-on a lathe from a profile the way the real thing is, the liquid, the bubbles,
-the electrodes, the lamp, the spatula and the egg.
+in code: the room with its benches, cabinets and shelving, the glassware, which
+is turned on a lathe from a profile the way the real thing is, the liquid, the
+bubbles, the electrodes, the lamp, the spatula and the egg. The floor tiles and
+the surround the glass reflects are drawn to a canvas at runtime rather than
+loaded. The only image file in the repository is the project's own logo.
 
 ## License
 
