@@ -193,19 +193,12 @@ frontend reads `API_BASE_URL` from its environment at runtime through
 | `docker-compose.prod.yml` | One deployment unit runs both services |
 | `docker-compose.backrust.yml` and `docker-compose.frontnext.yml` | Each service is its own deployment unit, with its own environment and its own logs |
 
-Splitting them is safe because the two never talk to each other over a private
-network: the browser calls the API on its public hostname.
-
 Two services, on two hostnames:
 
 | Service | Hostname |
 |---|---|
 | `frontnext` | `chemlab.eziedutech.dev` |
 | `backrust` | `apichemlab.eziedutech.dev` |
-
-Both are single label subdomains on purpose. The certificate at the Cloudflare
-edge covers `*.eziedutech.dev` and that wildcard is one level deep, so a name
-like `api.chemlab.eziedutech.dev` would not be covered.
 
 1. Point both hostnames at the VPS with an A record before deploying, so a
    certificate can be issued for each of them.
