@@ -56,7 +56,7 @@ function shelfPlacements(count: number, levels: number[], jitter: number): Place
             y,
             spread + (Math.random() - 0.5) * 0.22,
           ],
-          scale: 0.8 + Math.random() * 0.5,
+          scale: 0.9 + Math.random() * 0.35,
           rotation: Math.random() * Math.PI,
         });
       }
@@ -119,13 +119,19 @@ function Glassware() {
   const erlenmeyer = useGlasswarePiece(GLASSWARE_NODES.erlenmeyer);
   const cylinder = useGlasswarePiece(GLASSWARE_NODES.cylinderShort);
 
+  // Heights are the surfaces themselves. The imported meshes carry their origin
+  // at the base, so anything else leaves them hovering above the shelf.
+  const lowerShelf = 1.72 + 0.018;
+  const upperShelf = 2.24 + 0.018;
+  const counterTop = COUNTER_HEIGHT + 0.035;
+
   const bottlePlacements = useMemo(
-    () => shelfPlacements(BOTTLE_COUNT, [1.79, 2.31, COUNTER_HEIGHT + 0.13], 0.24),
-    [],
+    () => shelfPlacements(BOTTLE_COUNT, [lowerShelf, upperShelf, counterTop], 0.24),
+    [lowerShelf, upperShelf, counterTop],
   );
   const flaskPlacements = useMemo(
-    () => shelfPlacements(FLASK_COUNT, [1.81, COUNTER_HEIGHT + 0.15], 0.3),
-    [],
+    () => shelfPlacements(FLASK_COUNT, [lowerShelf, counterTop], 0.3),
+    [lowerShelf, counterTop],
   );
 
   /** The model is drawn in centimetres; the room is in metres. */
@@ -157,13 +163,14 @@ function Glassware() {
 
   const shelfMaterial = (
     <meshPhysicalMaterial
-      color="#dceaf5"
+      color="#eaf4fd"
       transparent
-      opacity={0.38}
-      roughness={0.08}
+      opacity={0.5}
+      roughness={0.06}
       metalness={0}
       ior={1.5}
-      envMapIntensity={1.4}
+      reflectivity={0.6}
+      envMapIntensity={2.2}
     />
   );
 

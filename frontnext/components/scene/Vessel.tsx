@@ -50,9 +50,15 @@ function lerp(a: number, b: number, t: number): number {
 }
 
 interface VesselProps {
-  job: PourJob;
-  index: number;
+  /** The job this vessel is carrying out, or null while it just stands there. */
+  job: PourJob | null;
+  /** Which of the bench positions it occupies. */
+  slotIndex: number;
   total: number;
+  /** What kind of vessel this position holds, whether or not it is in use. */
+  kind: "pour" | "scoop";
+  /** Position in the batch, which is what staggers the filling. */
+  orderIndex: number;
 }
 
 /**
@@ -65,8 +71,10 @@ interface VesselProps {
  * comes the vessel is lifted, tipped over the beaker, and emptied, and its own
  * contents drain away as the beaker fills.
  */
-export function Vessel({ job, index, total }: VesselProps) {
-  const isActive = useLabStore((state) => state.pourQueue[0]?.id === job.id);
+export function Vessel({ job, slotIndex, total, kind, orderIndex }: VesselProps) {
+  const isActive = useLabStore((state) =>
+    job ? state.pourQueue[0]?.id === job.id : false,
+  );
   const applyPour = useLabStore((state) => state.applyPour);
   const completePour = useLabStore((state) => state.completePour);
 
@@ -84,9 +92,11 @@ export function Vessel({ job, index, total }: VesselProps) {
   /** How full the vessel is, 1 while it holds its full measure. */
   const fill = useRef(0);
 
-  const isScoop = job.kind === "scoop";
+  const isScoop = kind === "scoop";
   const piece = useGlasswarePiece(GLASSWARE_NODES.cylinder);
-  const slot = useMemo(() => vesselSlot(index, total), [index, total]);
+  const slot = useMemo(() => vesselSlot(slotIndex, total), [slotIndex, total]);
+  /** Reagent colour, or plain glass while the vessel is empty. */
+  const contentColor = job?.color ?? "#cfe0ee";
   /** Mouth height when the vessel stands on the bench. */
   const restHeight = isScoop ? 0.16 : CYLINDER_HEIGHT;
 
@@ -111,7 +121,11 @@ export function Vessel({ job, index, total }: VesselProps) {
       elapsed.current = 0;
       applied.current = false;
     }
-  }, [isActive]);
+    if (!job) {
+      started.current = false;
+      fill.current = 0;
+    }
+  }, [isActive, job]);
 
   useFrame((_, delta) => {
     const group = carrier.current;
@@ -122,8 +136,9 @@ export function Vessel({ job, index, total }: VesselProps) {
     const mix = state.mix;
 
     // --- measuring: the vessel fills where it stands --------------------
-    if (mix && mix.stage === "measuring") {
-      const sinceStart = Date.now() - mix.startedAt - index * MEASURE_STAGGER_MS;
+    if (job && mix && mix.stage === "measuring") {
+      const sinceStart =
+        Date.now() - mix.startedAt - orderIndex * MEASURE_STAGGER_MS;
       const measured = Math.min(1, Math.max(0, sinceStart / MEASURE_DURATION_MS));
       fill.current = easeInOut(measured);
       group.position.set(slot[0], restHeight, slot[2]);
@@ -132,7 +147,7 @@ export function Vessel({ job, index, total }: VesselProps) {
     }
 
     // --- adding: whoever is at the head of the queue goes to the beaker --
-    if (isActive) {
+    if (isActive && job) {
       elapsed.current += delta * 1000;
       const t = Math.min(1, elapsed.current / POUR_DURATION_MS);
 
@@ -187,7 +202,7 @@ export function Vessel({ job, index, total }: VesselProps) {
           stream.position.set(0, -length / 2, 0);
           if (streamMaterial.current) {
             const p = progressWithin(t, PHASE.tipEnd, PHASE.pourEnd);
-            streamMaterial.current.color.set(job.color);
+            streamMaterial.current.color.set(contentColor);
             streamMaterial.current.opacity = 0.8 * Math.min(1, Math.min(p, 1 - p) * 8);
           }
         }
@@ -200,15 +215,15 @@ export function Vessel({ job, index, total }: VesselProps) {
       }
 
       if (t >= 1) completePour(job.id);
-    } else if (mix && mix.stage !== "measuring") {
-      // Waiting its turn, or already emptied: stand still on the bench.
+    } else if (!job || (mix && mix.stage !== "measuring")) {
+      // Idle, waiting its turn, or already emptied: stand still on the bench.
       group.position.set(slot[0], restHeight, slot[2]);
       tilt.rotation.z = 0;
       if (streamRef.current) streamRef.current.visible = false;
     }
 
     // --- what the vessel holds -------------------------------------------
-    const held = fill.current * job.measuredMl;
+    const held = fill.current * (job?.measuredMl ?? 0);
     const liquid = liquidRef.current;
     const surface = surfaceRef.current;
     if (liquid && surface) {
@@ -253,7 +268,7 @@ export function Vessel({ job, index, total }: VesselProps) {
               </mesh>
               <mesh ref={heapRef} position={[-0.02, 0.062, 0]}>
                 <sphereGeometry args={[0.078, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
-                <meshStandardMaterial color={job.color} roughness={0.9} metalness={0} />
+                <meshStandardMaterial color={contentColor} roughness={0.9} metalness={0} />
               </mesh>
             </group>
           ) : (
@@ -357,7 +372,7 @@ export function Vessel({ job, index, total }: VesselProps) {
                   args={[CYLINDER_RADIUS - 0.012, CYLINDER_RADIUS - 0.012, 1, 32]}
                 />
                 <meshStandardMaterial
-                  color={job.color}
+                  color={contentColor}
                   transparent
                   opacity={0.88}
                   roughness={0.25}
@@ -366,7 +381,7 @@ export function Vessel({ job, index, total }: VesselProps) {
               <mesh ref={surfaceRef} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
                 <circleGeometry args={[CYLINDER_RADIUS - 0.012, 32]} />
                 <meshStandardMaterial
-                  color={job.color}
+                  color={contentColor}
                   transparent
                   opacity={0.95}
                   roughness={0.12}
@@ -383,7 +398,7 @@ export function Vessel({ job, index, total }: VesselProps) {
           <cylinderGeometry args={[0.028, 0.04, 1, 14, 1, true]} />
           <meshStandardMaterial
             ref={streamMaterial}
-            color={job.color}
+            color={contentColor}
             transparent
             opacity={0.8}
             roughness={0.2}

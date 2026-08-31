@@ -31,8 +31,11 @@ export function LabScene() {
     >
       <color attach="background" args={["#141b26"]} />
 
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[3, 5, 2]} intensity={1.5} color="#eaf4ff" />
+      <ambientLight intensity={0.62} />
+      <directionalLight position={[3, 5, 2]} intensity={1.6} color="#eaf4ff" />
+      {/* A soft light just above the bench, so the glassware is lit from the
+          side the camera is on rather than only from behind. */}
+      <pointLight position={[1.6, 2.2, 2.4]} intensity={0.7} color="#eaf4ff" />
       <directionalLight position={[-3, 2, -2]} intensity={0.5} color="#8fb6d9" />
 
       <Environment resolution={128}>

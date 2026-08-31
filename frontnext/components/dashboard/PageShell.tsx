@@ -40,7 +40,7 @@ export function PageShell() {
       {/* Enough shading for glass panels to stay legible over a lit room. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(130%_100%_at_40%_10%,rgba(6,11,20,0.18),rgba(6,11,20,0.78))]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(135%_105%_at_40%_15%,rgba(6,11,20,0.06),rgba(6,11,20,0.62))]"
       />
 
       {/* Top bar. */}

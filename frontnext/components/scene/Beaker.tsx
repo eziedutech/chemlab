@@ -90,17 +90,20 @@ export function Beaker() {
               samples={2}
               resolution={256}
               transmission={1}
-              thickness={0.22}
-              roughness={0.08}
-              ior={1.5}
-              chromaticAberration={0.035}
+              /* Thin, barely attenuating glass. Anything thicker tints the
+                 beaker towards the dark room behind it and it reads as smoked
+                 glass rather than laboratory glass. */
+              thickness={0.06}
+              roughness={0.06}
+              ior={1.45}
+              chromaticAberration={0.03}
               anisotropy={0.1}
-              distortion={0.05}
+              distortion={0.04}
               distortionScale={0.2}
               temporalDistortion={0}
-              color="#eef6ff"
-              attenuationColor="#dbeaf6"
-              attenuationDistance={2.4}
+              color="#ffffff"
+              attenuationColor="#f2f8ff"
+              attenuationDistance={12}
               side={DoubleSide}
             />
           ) : (
